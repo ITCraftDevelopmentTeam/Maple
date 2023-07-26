@@ -1,0 +1,6 @@
+.venv
+data
+go-cqhttp
+qsign
+__pycache__
+**/!*

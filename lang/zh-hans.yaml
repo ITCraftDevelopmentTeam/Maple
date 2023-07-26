@@ -1,0 +1,63 @@
+lang:
+  list: |
+    当前可用语言：
+    {{
+      "\n".join([(
+        f"> {lang}"
+        if lang == __lang__
+        else f"- {lang}"
+      ) for lang in langs])
+    }}
+  set: "已成功设置语言为 {{ lang }}"
+
+quick-math:
+  auto:
+    "on": "已开启 auto-quick-math"
+    "off": "已关闭 auto-quick-math"
+  eggs:
+    0 / 0 = ?: "[iI][nN][fF]([iI][nN][iI][tT][yY])?|[nN]a[nN]|ZeroDivisionError"
+    creeper?: "[aA][wW]+.*?[mM][aA][N].*?"
+    undefined + undefined = ?: "[iI][nN][fF]([iI][nN][iI][tT][yY])?|[nN][aA][nN]|[uU][nN][dD][fF][iI][nN][eE][dD]"
+    114 + 514 = ?: "哼+啊+|114|514|114514|1919|810|1919810"
+  question: "{{ a }} {{ op }} {{ b }} = ?"
+  correct: |
+    回答正确！
+    恭喜你获得了{{ got }}点 credit！
+    你当前拥有{{ total }}点 credit！
+
+hot:
+  rank: |
+    {{
+      "\n".join([
+        f"> {index + 1}. {group_name}: {count}"
+        if group_id == event.group_id else
+        f"- {index + 1}. {group_name}: {count}"
+        for index, (group_name, count, group_id) in enumerate(ranks[:11])
+      ]) if ranks else "没有群聊发言呢。。。"
+    }}
+  10min: |
+    近十分钟群聊热度排行：
+    {{ text("hot.rank") }}
+  hour: |
+    近一小时群聊热度排行：
+    {{ text("hot.rank") }}
+  day: |
+    今日群聊热度排行：
+    {{ text("hot.rank") }}
+  total: |
+    总群聊热度排行：
+    {{ text("hot.rank") }}
+
+who-at-me:
+  empty: "没有关于你的消息呢。。。"
+  expire: "消息已经过期了呢，下次记得早点来哦！"
+
+cave:
+  add: "回声洞#{{ cave_id }} 添加成功！"
+  read: |
+    回声洞#{{ cave_id }}：
+    {{ content }}
+    —— {{ sender }}
+  title: "回声洞#{{ cave_id }} —— {{ sender }}"
+  empty: "回声洞里空空如也呢，快去投稿吧！"
+  non-exist: "回声洞#{{ cave_id }} 不存在呢。。。"
