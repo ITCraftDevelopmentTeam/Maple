@@ -35,19 +35,40 @@ class JsonDict(dict, Generic[T]):
     def __getitem__(self, __key: Any) -> T:
         if __key not in self.keys():
             super().__setitem__(__key, self.default_factory())
-        self.save()
+        dump_json(self, self.path)
         return super().__getitem__(__key)
 
     def __setitem__(self, __key: Any, __value: Any) -> None:
         super().__setitem__(__key, __value)
-        self.save()
+        dump_json(self, self.path)
 
     def __delitem__(self, __key: Any) -> None:
         super().__delitem__(__key)
-        self.save()
-
-    def save(self) -> None:
         dump_json(self, self.path)
 
-    def __del__(self) -> None:
-        self.save()
+
+class Json:
+    def __init__(
+        self,
+        path: str,
+        default_factory: Callable[[], T] = int
+    ) -> None:
+        self.path = os.path.join("data", path)
+        data = load_json(self.path)
+        assert isinstance(data, dict)
+        super().__init__(data)
+        self.default_factory = default_factory
+
+    def __getitem__(self, __key: Any) -> T:
+        if __key not in self.keys():
+            super().__setitem__(__key, self.default_factory())
+        dump_json(self, self.path)
+        return super().__getitem__(__key)
+
+    def __setitem__(self, __key: Any, __value: Any) -> None:
+        super().__setitem__(__key, __value)
+        dump_json(self, self.path)
+
+    def __delitem__(self, __key: Any) -> None:
+        super().__delitem__(__key)
+        dump_json(self, self.path)

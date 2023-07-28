@@ -1,8 +1,7 @@
 import os
 import re
 from functools import partial
-from traceback import format_exc
-from typing import Literal, Optional, Any
+from typing import Optional, Any
 
 import yaml
 
@@ -14,9 +13,8 @@ from ._store import JsonDict
 
 lang_use = JsonDict("lang_use.json", lambda: "zh-hans")
 lang_names = os.listdir("lang")
-LangTag = exec("Literal['" + "','".join(lang_names) + "']")
+LangTag = exec("__import__('typing').Literal['" + "','".join(lang_names) + "']")
 LangType = LangTag | UserID | MessageEvent
-
 langs = {}
 for filename in lang_names:
     lang = os.path.splitext(filename)[0]
@@ -25,12 +23,12 @@ for filename in lang_names:
         langs[lang] = yaml.safe_load(file)
 
 
-def parse(__text: str, **kwargs) -> str:
+def parse(__text: str, **kwargs: Any) -> str:
     def repl(match: re.Match[str]) -> str:
         expr = match.group()[2:-2]
         return str(eval(expr.strip(), kwargs))
 
-    return re.sub("{{.*?}}", repl, __text, flags=re.DOTALL).strip()
+    return re.sub("{{.*?}}", repl, __text, flags=re.DOTALL)
 
 
 def text(__lang: LangType, __key: str, **kwargs: Any) -> Optional[Any]:
@@ -57,8 +55,8 @@ def text(__lang: LangType, __key: str, **kwargs: Any) -> Optional[Any]:
 
     if isinstance(data, str):
         return parse(data, **{
-                "__lang__": lang,
-                "text": partial(text, lang, **kwargs),
-                **kwargs
-            })
+            "__lang__": lang,
+            "text": partial(text, lang, **kwargs),
+            **kwargs
+        })
     return data

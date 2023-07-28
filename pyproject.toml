@@ -1,7 +1,7 @@
 [project]
-name = "Maple-Bot"
+name = "Maple"
 version = "0.1.0"
-description = "Maple-Bot"
+description = "Maple"
 readme = "README.md"
 requires-python = ">=3.8, <4.0"
 

@@ -1,18 +1,14 @@
+from ._onebot import send, get_group_name, GroupID
+from ._store import JsonDict
+from ._lang import text
+from nonebot_plugin_apscheduler import scheduler
 import os
 from time import time
 from datetime import date
 
 from nonebot import require
-from nonebot import on_command, on_message
-from nonebot.matcher import Matcher
-from nonebot.params import CommandArg
-from nonebot.adapters.onebot.v11 import Message, GroupMessageEvent
-
-from nonebot_plugin_apscheduler import scheduler
-
-from ._lang import text
-from ._store import JsonDict
-from ._onebot import get_group_name
+from nonebot import CommandGroup, on_message
+from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
 
 
 require("nonebot_plugin_apscheduler")
@@ -25,62 +21,70 @@ def get_day_path() -> str:
 MINUTE = 60
 HOUR = 3600
 
-STAMPS_PATH = os.path.join("hot", "stamps.json")
-DAY_PATH = get_day_path()
-TOTAL_PATH = os.path.join("hot", "total.json")
-
-
-@scheduler.scheduled_job("cron", day="*", id="update_day_path")
-async def update_day_path() -> None:
-    global DAY_PATH
-    DAY_PATH = get_day_path()
-
-
-@scheduler.scheduled_job("cron", minute="*/10", id="update_stamps")
-async def update_stamps() -> None:
-    stamps = JsonDict(STAMPS_PATH, list[int])
-    for group_id, group_stamps in stamps.items():
-        stamps[group_id] = filter_stamps(group_stamps)
-
-
-def filter_stamps(stamps: list[int], expire_time: int = HOUR) -> list[int]:
-    return list(filter(lambda x: int(time()) - x <= expire_time, stamps))
+stamps = JsonDict(os.path.join("hot", "stamps.json"), list[int])
+day = JsonDict(get_day_path(), int)
+total = JsonDict(os.path.join("hot", "total.json"), int)
+hot = CommandGroup("hot")
 
 
 @on_message().handle()
 async def hot_counter_handle(event: GroupMessageEvent) -> None:
-    stamps = JsonDict(STAMPS_PATH, list[int])
     stamps[str(event.group_id)].append(event.time)
-    JsonDict(DAY_PATH)[str(event.group_id)] += 1
-    JsonDict(TOTAL_PATH)[str(event.group_id)] += 1
+    day[str(event.group_id)] += 1
+    total[str(event.group_id)] += 1
 
 
-@on_command("hot").handle()
-async def hot_handle(
-    matcher: Matcher,
-    event: GroupMessageEvent,
-    arg: Message = CommandArg()
+@hot.command(tuple()).handle()
+async def hot_handle(event: MessageEvent) -> None:
+    await show_rank("hot.10min", [
+        (group_id, len(filter_stamps(group_stamps, 10*MINUTE)))
+        for group_id, group_stamps in stamps.items()
+    ])
+
+
+@hot.command("hour").handle()
+async def hot_hour_handle(event: MessageEvent) -> None:
+    await show_rank("hot.hour", [
+        (group_id, len(filter_stamps(group_stamps, HOUR)))
+        for group_id, group_stamps in stamps.items()
+    ])
+
+
+@hot.command("day").handle()
+async def hot_day_handle(event: MessageEvent) -> None:
+    await show_rank("hot.day", day.items())
+
+
+@hot.command("total").handle()
+async def hot_total_handle(event: MessageEvent) -> None:
+    await show_rank("hot.total", total.items())
+
+
+@scheduler.scheduled_job("cron", minute="*/10", id="update_stamps")
+async def update_stamps() -> None:
+    for group_id, group_stamps in stamps.items():
+        stamps[group_id] = filter_stamps(group_stamps)
+
+
+@scheduler.scheduled_job("cron", day="*", id="update_day_path")
+async def update_day_path() -> None:
+    global day
+    day = JsonDict(get_day_path(), int)
+
+
+async def show_rank(
+    event: MessageEvent,
+    key: str,
+    ranks: list[tuple[GroupID, int]]
 ) -> None:
-    match str(arg).strip():
-        case "":
-            key = "hot.10min"
-            stamps = JsonDict(STAMPS_PATH, list[int])
-            ranks = [(group_id, len(filter_stamps(group_stamps, 10*MINUTE)))
-                     for group_id, group_stamps in stamps.items()]
-        case "-h":
-            key = "hot.hour"
-            stamps = JsonDict(STAMPS_PATH, list[int])
-            ranks = [(group_id, len(filter_stamps(group_stamps, HOUR)))
-                     for group_id, group_stamps in stamps.items()]
-        case "-d":
-            key = "hot.day"
-            ranks = JsonDict(DAY_PATH).items()
-        case "-t":
-            key = "hot.total"
-            ranks = JsonDict(TOTAL_PATH).items()
-        case _:
-            await matcher.finish()
-    ranks = [(await get_group_name(group_id), count, int(group_id))
-             for group_id, count in ranks if count != 0]
+    ranks = [
+        (await get_group_name(group_id), count, int(group_id))
+        for group_id, count in ranks
+        if count != 0
+    ]
     ranks.sort(key=lambda x: x[1], reverse=True)
-    await matcher.send(text(event.user_id, key, ranks=ranks, event=event))
+    await send(event, text(event, key, ranks=ranks, event=event))
+
+
+def filter_stamps(stamps: list[int], expire_time: int = HOUR) -> list[int]:
+    return list(filter(lambda x: int(time()) - x <= expire_time, stamps))

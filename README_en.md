@@ -1,6 +1,6 @@
-[简体中文](https://github.com/ITCraftDevelopmentTeam/Maple-Bot/blob/master/README.md) | English
+[简体中文](https://github.com/ITCraftDevelopmentTeam/Maple/blob/master/README.md) | English
 
-![Maple-Bot](https://socialify.git.ci/ITCraftDevelopmentTeam/Maple-Bot/image?description=1&descriptionEditable=A%20Easy%20and%20Light%20QQ%20Bot&font=Inter&forks=1&issues=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FITCraftDevelopmentTeam%2FMaple-Bot%2Fmaster%2Flogo.svg&name=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Light)
+![Maple](https://socialify.git.ci/ITCraftDevelopmentTeam/Maple/image?description=1&descriptionEditable=A%20Easy%20and%20Light%20QQ%20Bot&font=Inter&forks=1&issues=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FITCraftDevelopmentTeam%2FMaple%2Fmaster%2Flogo.svg&name=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Light)
 
 <div align="center">
   <img alt="license MIT" src="https://img.shields.io/badge/license-MIT-green">
@@ -10,7 +10,7 @@
 </div>
 
 ## Intro
-`ITCraftDevelopmentTeam/Maple-Bot` (hereinafter referred to as `Maple-Bot`) is a QQ bot which is based on `NoneBot2` and `OneBot 11`.
+`ITCraftDevelopmentTeam/Maple` (hereinafter referred to as `Maple`) is a QQ bot which is based on `NoneBot2` and `OneBot 11`.
 
 ## Thanks
 - [IT Craft Development Team](https://itcdt.top)
@@ -18,6 +18,6 @@
 - [VS Code](https://code.visualstudio.com/)
 - [NoneBot2](https://github.com/nonebot/nonebot2)
 - [OneBot 11](https://11.onebot.dev)
-- [Contributors](https://github.com/ITCraftDevelopmentTeam/Maple-Bot/graphs/contributors)：
+- [Contributors](https://github.com/ITCraftDevelopmentTeam/Maple/graphs/contributors)：
 
-<img src="https://contrib.rocks/image?repo=ITCraftDevelopmentTeam/Maple-Bot" />
+<img src="https://contrib.rocks/image?repo=ITCraftDevelopmentTeam/Maple" />

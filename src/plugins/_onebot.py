@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, cast
+from typing import Optional
 
 from nonebot import get_bot
 from nonebot.adapters import Message, MessageSegment, MessageTemplate
@@ -6,9 +6,9 @@ from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
 
 UserID = GroupID = MessageID = str | int
 AnyMessage = str | Message | MessageSegment | MessageTemplate
-MessageType = Dict[str, int | str | Dict[str, int | str]]
-ForwardNode = Dict[str, str |
-                   Dict[str, str | int | AnyMessage | List["ForwardNode"]]]
+MessageType = dict[str, int | str | dict[str, int | str]]
+ForwardNode = dict[str, str |
+                   dict[str, str | int | AnyMessage | list["ForwardNode"]]]
 
 AT_PATTERN = r"\[CQ:at,qq=(\d+|all)\]"
 REPLY_PATTERN = r"\[CQ:reply,id=(-?\d+)\]"
@@ -93,7 +93,7 @@ async def delete_msg(message_id: MessageID) -> None:
 async def get_group_info(
     group_id: GroupID,
     no_cache: bool = False
-) -> Dict[str, str | int]:
+) -> dict[str, str | int]:
     return await get_bot().get_group_info(
         group_id=int(group_id),
         no_cache=no_cache
@@ -104,7 +104,7 @@ async def get_group_member_info(
     group_id: GroupID,
     user_id: UserID,
     no_cache: bool = False
-) -> Dict[str, str]:
+) -> dict[str, str]:
     return await get_bot().get_group_member_info(
         group_id=int(group_id),
         user_id=int(user_id),
@@ -115,7 +115,7 @@ async def get_group_member_info(
 async def get_stranger_info(
     user_id: UserID,
     no_cache: bool = False
-) -> Dict[str, str]:
+) -> dict[str, str]:
     return await get_bot().get_stranger_info(
         user_id=int(user_id),
         no_cache=no_cache
@@ -124,7 +124,7 @@ async def get_stranger_info(
 
 async def custom_forward_node(
     user_id: UserID,
-    content: AnyMessage | List[ForwardNode],
+    content: AnyMessage | list[ForwardNode],
     name: Optional[str] = None,
     group_id: Optional[GroupID] = None,
     time: Optional[int | str] = None
@@ -140,7 +140,7 @@ async def custom_forward_node(
         }
     }
     if time is not None:
-        cast(Dict[str, int | str], node["data"])["time"] = int(time)
+        node["data"]["time"] = int(time)
     return node
 
 
@@ -155,7 +155,7 @@ def referencing_forward_node(id: MessageID) -> ForwardNode:
 
 async def send_group_forward_msg(
     group_id: GroupID,
-    messages: List[ForwardNode],
+    messages: list[ForwardNode]
 ) -> None:
     await get_bot().send_group_forward_msg(
         group_id=int(group_id),
@@ -163,10 +163,41 @@ async def send_group_forward_msg(
     )
 
 
+async def send_private_forward_msg(
+    user_id: UserID,
+    messages: list[ForwardNode]
+) -> dict[str, int | str]:
+    return await get_bot().send_private_forward_msg(
+        user_id=int(user_id),
+        messages=messages
+    )
+
+
+async def send_group_forward_msg(
+    group_id: GroupID,
+    messages: list[ForwardNode]
+) -> dict[str, int | str]:
+    await get_bot().send_group_forward_msg(
+        group_id=int(group_id),
+        messages=messages
+    )
+
+
+async def send_forward_msg(
+    messages: list[ForwardNode],
+    user_id: Optional[UserID] = None,
+    group_id: Optional[GroupID] = None
+) -> dict[str, int | str]:
+    if group_id is not None:
+        return await send_group_forward_msg(group_id, messages)
+    if user_id is not None:
+        return await send_private_forward_msg(user_id, messages)
+
+
 async def get_group_msg_history(
     group_id: GroupID,
     message_seq: Optional[MessageID] = None
-) -> List[MessageType]:
+) -> list[MessageType]:
     return (await get_bot().get_group_msg_history(
         message_seq=message_seq,
         group_id=int(group_id)
@@ -188,10 +219,10 @@ async def get_user_name(
 
 
 async def get_group_name(group_id: GroupID) -> str:
-    return cast(str, (await get_group_info(group_id))["group_name"])
+    return (await get_group_info(group_id))["group_name"]
 
 
 async def get_msg(
     message_id: MessageID
-) -> Dict[str, str | int | Dict[str, str | int]]:
+) -> dict[str, str | int | dict[str, str | int]]:
     return await get_bot().get_msg(message_id=int(message_id))

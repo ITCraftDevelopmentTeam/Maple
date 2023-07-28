@@ -1,6 +1,6 @@
-简体中文 | [English](https://github.com/ITCraftDevelopmentTeam/Maple-Bot/blob/master/README_en.md)
+简体中文 | [English](https://github.com/ITCraftDevelopmentTeam/Maple/blob/master/README_en.md)
 
-![Maple-Bot](https://socialify.git.ci/ITCraftDevelopmentTeam/Maple-Bot/image?description=1&descriptionEditable=%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E8%BD%BB%E9%87%8F%E5%8C%96%20QQ%20Bot&font=Inter&forks=1&issues=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FITCraftDevelopmentTeam%2FMaple-Bot%2Fmaster%2Flogo.svg&name=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Light)
+![Maple](https://socialify.git.ci/ITCraftDevelopmentTeam/Maple/image?description=1&descriptionEditable=%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E8%BD%BB%E9%87%8F%E5%8C%96%20QQ%20Bot&font=Inter&forks=1&issues=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FITCraftDevelopmentTeam%2FMaple%2Fmaster%2Flogo.svg&name=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Light)
 
 <div align="center">
   <img alt="license MIT" src="https://img.shields.io/badge/license-MIT-green">
@@ -10,7 +10,7 @@
 </div>
 
 ## 简介
-`ITCraftDevelopmentTeam/Maple-Bot`（以下简称`Maple-Bot`）是一个基于`NoneBot2` 与 `OneBot 11` 的QQ机器人。
+`ITCraftDevelopmentTeam/Maple`（以下简称`Maple`）是一个基于`NoneBot2` 与 `OneBot 11` 的QQ机器人。
 
 ## 鸣谢
 - [IT Craft Development Team](https://itcdt.top)
@@ -18,6 +18,6 @@
 - [VS Code](https://code.visualstudio.com/)
 - [NoneBot2](https://github.com/nonebot/nonebot2)
 - [OneBot 11](https://11.onebot.dev)
-- [开发者们](https://github.com/ITCraftDevelopmentTeam/Maple-Bot/graphs/contributors)：
+- [开发者们](https://github.com/ITCraftDevelopmentTeam/Maple/graphs/contributors)：
 
-<img src="https://contrib.rocks/image?repo=ITCraftDevelopmentTeam/Maple-Bot" />
+<img src="https://contrib.rocks/image?repo=ITCraftDevelopmentTeam/Maple" />

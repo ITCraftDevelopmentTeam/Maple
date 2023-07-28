@@ -1,5 +1,10 @@
 lang:
-  list: |
+  help: |-
+    lang —— 语言
+    #lang [语言]：设置语言
+    #lang.list：列出当前可用语言
+    #lang.add：贡献语言
+  list: |-
     当前可用语言：
     {{
       "\n".join([(
@@ -9,6 +14,7 @@ lang:
       ) for lang in langs])
     }}
   set: "已成功设置语言为 {{ lang }}"
+  add: "如果你能熟练使用 GitHub 的话，请到 ITCraftDevelopTeam/Maple 发起拉取请求"
 
 quick-math:
   auto:
@@ -20,13 +26,19 @@ quick-math:
     undefined + undefined = ?: "[iI][nN][fF]([iI][nN][iI][tT][yY])?|[nN][aA][nN]|[uU][nN][dD][fF][iI][nN][eE][dD]"
     114 + 514 = ?: "哼+啊+|114|514|114514|1919|810|1919810"
   question: "{{ a }} {{ op }} {{ b }} = ?"
-  correct: |
+  correct: |-
     回答正确！
     恭喜你获得了{{ got }}点 credit！
     你当前拥有{{ total }}点 credit！
 
 hot:
-  rank: |
+  help: |-
+    hot —— 群聊热度排行
+    #hot：显示近十分钟群聊热度排行
+    #hot.hour：显示近一小时群聊热度排行
+    #hot.day：显示今日群聊热度排行榜
+    #hot.total：显示总群聊热度排行
+  rank: |-
     {{
       "\n".join([
         f"> {index + 1}. {group_name}: {count}"
@@ -35,16 +47,16 @@ hot:
         for index, (group_name, count, group_id) in enumerate(ranks[:11])
       ]) if ranks else "没有群聊发言呢。。。"
     }}
-  10min: |
+  10min: |-
     近十分钟群聊热度排行：
     {{ text("hot.rank") }}
-  hour: |
+  hour: |-
     近一小时群聊热度排行：
     {{ text("hot.rank") }}
-  day: |
+  day: |-
     今日群聊热度排行：
     {{ text("hot.rank") }}
-  total: |
+  total: |-
     总群聊热度排行：
     {{ text("hot.rank") }}
 
@@ -53,11 +65,20 @@ who-at-me:
   expire: "消息已经过期了呢，下次记得早点来哦！"
 
 cave:
+  help: |-
+    cave —— 回声洞
+    #cave：随机读取一条 cave
+    #cave.add [内容]：添加一条 cave
+    [回复] #cave.add：将回复的消息添加到 cave
+    #cave.comment [cave id] [内容]：评论一条 cave
+    #cave.remove [cave id]：删除一条 cave
   add: "回声洞#{{ cave_id }} 添加成功！"
-  read: |
+  read: |-
     回声洞#{{ cave_id }}：
     {{ content }}
     —— {{ sender }}
   title: "回声洞#{{ cave_id }} —— {{ sender }}"
   empty: "回声洞里空空如也呢，快去投稿吧！"
   non-exist: "回声洞#{{ cave_id }} 不存在呢。。。"
+  remove: "回声洞#{{ cave_id }} 已成功删除！"
+  no-permission: "您没有权限删除回声洞#{{ cave_id }} 呢。。。"
