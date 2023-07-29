@@ -29,6 +29,10 @@ help:
     [回复] #cave.add：将回复的消息添加到 cave
     #cave.comment [cave id] [内容]：评论一条 cave
     #cave.remove [cave id]：删除一条 cave
+  quick-math: |-
+    quick-math —— 速算
+    #quick-math：开启速算
+    #quick-math [on|off]：[开启|关闭]连续速算
 
 lang:
   list: |-
@@ -45,9 +49,8 @@ lang:
   add: "如果你能熟练使用 GitHub 的话，请到 ITCraftDevelopmentTeam/Maple 发起拉取请求"
 
 quick-math:
-  auto:
-    "on": "已开启 auto-quick-math"
-    "off": "已关闭 auto-quick-math"
+  "on": "已开启连续速算"
+  "off": "已关闭连续速算"
   eggs:
     0 / 0 = ?: "[iI][nN][fF]([iI][nN][iI][tT][yY])?|[nN]a[nN]|ZeroDivisionError"
     creeper?: "[aA][wW]+.*?[mM][aA][N].*?"

@@ -77,10 +77,10 @@ async def quick_math_handle(
             event_id = get_event_id(event)
             if event_id not in auto_quick_math[event.message_type]:
                 auto_quick_math[event.message_type].append(event_id)
-            await send(event, text(event, "quick-math.auto.on"))
+            await send(event, text(event, "quick-math.on"))
 
         case "off":
             event_id = get_event_id(event)
             if event_id in auto_quick_math[event.message_type]:
                 auto_quick_math[event.message_type].remove(event_id)
-            await send(event, text(event, "quick-math.auto.off"))
+            await send(event, text(event, "quick-math.off"))
