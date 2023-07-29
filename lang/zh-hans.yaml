@@ -1,20 +1,48 @@
-lang:
-  help: |-
+help:
+  "": |-
+    help —— 帮助
+    {{
+      "\n".join([
+        f"#help {command}：查看关于 {name} 的帮助"
+        for (command, name) in {
+          "lang": "语言",
+          "hot": "群聊热度排行",
+          "cave": "回声洞"
+        }.items()
+      ])
+    }}
+  lang: |-
     lang —— 语言
     #lang [语言]：设置语言
     #lang.list：列出当前可用语言
     #lang.add：贡献语言
+  hot: |-
+    hot —— 群聊热度排行
+    #hot：显示近十分钟群聊热度排行
+    #hot.hour：显示近一小时群聊热度排行
+    #hot.day：显示今日群聊热度排行
+    #hot.total：显示总群聊热度排行
+  cave: |-
+    cave —— 回声洞
+    #cave：随机读取一条 cave
+    #cave.add [内容]：添加一条 cave
+    [回复] #cave.add：将回复的消息添加到 cave
+    #cave.comment [cave id] [内容]：评论一条 cave
+    #cave.remove [cave id]：删除一条 cave
+
+lang:
   list: |-
     当前可用语言：
     {{
-      "\n".join([(
+      "\n".join([
         f"> {lang}"
         if lang == __lang__
         else f"- {lang}"
-      ) for lang in langs])
+        for lang in langs
+      ])
     }}
   set: "已成功设置语言为 {{ lang }}"
-  add: "如果你能熟练使用 GitHub 的话，请到 ITCraftDevelopTeam/Maple 发起拉取请求"
+  add: "如果你能熟练使用 GitHub 的话，请到 ITCraftDevelopmentTeam/Maple 发起拉取请求"
 
 quick-math:
   auto:
@@ -32,12 +60,6 @@ quick-math:
     你当前拥有{{ total }}点 credit！
 
 hot:
-  help: |-
-    hot —— 群聊热度排行
-    #hot：显示近十分钟群聊热度排行
-    #hot.hour：显示近一小时群聊热度排行
-    #hot.day：显示今日群聊热度排行榜
-    #hot.total：显示总群聊热度排行
   rank: |-
     {{
       "\n".join([
@@ -65,15 +87,8 @@ who-at-me:
   expire: "消息已经过期了呢，下次记得早点来哦！"
 
 cave:
-  help: |-
-    cave —— 回声洞
-    #cave：随机读取一条 cave
-    #cave.add [内容]：添加一条 cave
-    [回复] #cave.add：将回复的消息添加到 cave
-    #cave.comment [cave id] [内容]：评论一条 cave
-    #cave.remove [cave id]：删除一条 cave
   add: "回声洞#{{ cave_id }} 添加成功！"
-  read: |-
+  text: |-
     回声洞#{{ cave_id }}：
     {{ content }}
     —— {{ sender }}
@@ -81,4 +96,6 @@ cave:
   empty: "回声洞里空空如也呢，快去投稿吧！"
   non-exist: "回声洞#{{ cave_id }} 不存在呢。。。"
   remove: "回声洞#{{ cave_id }} 已成功删除！"
-  no-permission: "您没有权限删除回声洞#{{ cave_id }} 呢。。。"
+  no-permission: "你没有权限删除回声洞#{{ cave_id }} 呢。。。"
+  comment: "回声洞#{{ cave_id }} 下的评论#{{ comment_id }} 已成功添加！"
+  comment-title: "来自 {{ sender }} 的评论#{{ comment_id }}"

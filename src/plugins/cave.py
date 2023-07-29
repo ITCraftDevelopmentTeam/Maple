@@ -69,7 +69,7 @@ async def cave_get_handle(
 
 
 @cave.command("comment", aliases={"cmt"}).handle()
-async def cave_get_handle(
+async def cave_comment_handle(
     matcher: Matcher,
     event: MessageEvent,
     arg: Message = CommandArg()
@@ -84,6 +84,11 @@ async def cave_get_handle(
         "content": content,
         "time": event.time
     })
+    await matcher.send(text(
+        event, "cave.comment",
+        cave_id=cave_id,
+        comment_id=len(caves[cave_id]["comments"]) - 1
+    ))
 
 
 @cave.command("remove", aliases={"rm"}).handle()
@@ -95,7 +100,7 @@ async def cave_remove_handle(
     cave_id = str(arg).strip()
     if cave_id not in caves.keys():
         await matcher.finish(text(event, "cave.non-exist", cave_id=cave_id))
-    if (str(event.user_id) in await get_bot().config.superusers
+    if (str(event.user_id) in get_bot().config.superusers
             or event.user_id == caves[cave_id]["user_id"]):
         caves.pop(cave_id)
         await matcher.finish(text(event, "cave.remove", cave_id=cave_id))
@@ -124,17 +129,24 @@ async def read_cave(
             await send(Message(content))
         else:
             await send(Message(text(
-                lang, "cave.read",
+                lang, "cave.text",
                 cave_id=cave_id,
                 content=content,
                 sender=sender
             )))
         if comments := caves[cave_id].get("comments"):
-            await send_forward_msg([await custom_forward_node(
-                (user_id := comment["user_id"]),
-                content=comment["content"],
-                name=get_user_name(user_id, group_id),
-                time=comment["time"]
-            ) for comment in comments], user_id, group_id)
+            await send_forward_msg([
+                await custom_forward_node(
+                    (user_id := comment["user_id"]),
+                    content=comment["content"],
+                    name=text(
+                        lang, "cave.comment-title",
+                        sender=await get_user_name(user_id),
+                        comment_id=comment_id
+                    ),
+                    group_id=group_id,
+                    time=comment["time"]
+                ) for comment_id, comment in enumerate(comments)
+            ], user_id=user_id, group_id=group_id)
     else:
         await send(text(lang, "cave.non-exist", cave_id=cave_id))

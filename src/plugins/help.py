@@ -1,22 +1,18 @@
+from typing import cast
+
+from nonebot import on_command
 from nonebot.matcher import Matcher
-from nonebot.adapters.onebot.v11 import MessageEvent
+from nonebot.params import CommandArg
+from nonebot.adapters.onebot.v11 import Message, MessageEvent
 
-from ._lang import text
-from .lang import lang
-from .hot import hot
-from .cave import cave
+from ._lang import parse, text
 
 
-@lang.command("help").handle()
-async def lang_help_handle(matcher: Matcher, event: MessageEvent) -> None:
-    await matcher.send(text(event, "lang.help"))
-
-
-@hot.command("help").handle()
-async def hot_help_handle(matcher: Matcher, event: MessageEvent) -> None:
-    await matcher.finish(text(event, "hot.help"))
-
-
-@cave.command("help").handle()
-async def cave_help_handle(matcher: Matcher, event: MessageEvent) -> None:
-    await matcher.send(text(event, "cave.help"))
+@on_command("help").handle()
+async def help_handle(
+    matcher: Matcher,
+    event: MessageEvent,
+    arg: Message = CommandArg()
+) -> None:
+    if (key := str(arg)) in (helps := cast(dict, text(event, "help"))).keys():
+        await matcher.send(parse(helps[key]))

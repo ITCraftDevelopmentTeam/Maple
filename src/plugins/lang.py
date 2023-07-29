@@ -4,7 +4,8 @@ from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11 import Message, MessageEvent
 
 from . import _lang
-from ._lang import text, lang_names as langs
+from ._lang import text, langs
+
 
 lang = CommandGroup("lang")
 

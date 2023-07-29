@@ -1,7 +1,7 @@
 import os
 import re
 from functools import partial
-from typing import Optional, Any
+from typing import Optional, Any, Literal   # this `Literal` is for `eval`
 
 import yaml
 
@@ -12,18 +12,26 @@ from ._store import JsonDict
 
 
 lang_use = JsonDict("lang_use.json", lambda: "zh-hans")
-lang_names = os.listdir("lang")
-LangTag = exec("__import__('typing').Literal['" + "','".join(lang_names) + "']")
-LangType = LangTag | UserID | MessageEvent
 langs = {}
-for filename in lang_names:
+for filename in os.listdir("lang"):
     lang = os.path.splitext(filename)[0]
     file_path = os.path.join("lang", filename)
     with open(file_path, "r", encoding="utf-8") as file:
         langs[lang] = yaml.safe_load(file)
+LangTag = eval("Literal['" + "','".join(langs.keys()) + "']")
+LangType = LangTag | UserID | MessageEvent
 
 
-def parse(__text: str, **kwargs: Any) -> str:
+def get_lang(lang: LangType) -> LangTag:
+    if hasattr(lang, "user_id"):
+        lang = lang.user_id
+    lang = str(lang)
+    if lang.isdecimal():
+        lang = lang_use[lang]
+    return lang
+
+
+def parse(__text: str, /, **kwargs: Any) -> str:
     def repl(match: re.Match[str]) -> str:
         expr = match.group()[2:-2]
         return str(eval(expr.strip(), kwargs))
@@ -31,17 +39,12 @@ def parse(__text: str, **kwargs: Any) -> str:
     return re.sub("{{.*?}}", repl, __text, flags=re.DOTALL)
 
 
-def text(__lang: LangType, __key: str, **kwargs: Any) -> Optional[Any]:
-    lang, key = __lang, __key
-    if hasattr(lang, "user_id"):
-        lang = lang.user_id
-    lang = str(lang)
-    if lang.isdecimal():
-        lang = lang_use[lang]
+def text(__lang: LangType, __key: str, /, **kwargs: Any) -> Optional[Any]:
+    lang, key = get_lang(__lang), __key
 
-    def gets(data: dict, key: str) -> Optional[Any]:
+    def gets(data: dict, __key: str) -> Optional[Any]:
         try:
-            for subkey in key.split("."):
+            for subkey in __key.split("."):
                 data = data[subkey]
         except KeyError:
             data = None
