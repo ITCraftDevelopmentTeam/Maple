@@ -7,8 +7,8 @@ import yaml
 
 from nonebot.adapters.onebot.v11.event import MessageEvent
 
-from ._onebot import UserID
 from ._store import JsonDict
+from ._onebot import UserID
 
 
 lang_use = JsonDict("lang_use.json", lambda: "zh-hans")

@@ -3,8 +3,7 @@ from nonebot.matcher import Matcher
 from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11 import Message, MessageEvent
 
-from . import _lang
-from ._lang import text, langs
+from ._lang import text, langs, lang_use
 
 
 lang = CommandGroup("lang")
@@ -17,7 +16,7 @@ async def lang_list_handle(
     arg: Message = CommandArg()
 ) -> None:
     if str(arg) in langs:
-        _lang.lang_use[event.user_id] = lang
+        lang_use[event.user_id] = lang
         await matcher.finish(text(event, "lang.set", lang=lang))
     await matcher.finish(text(event, "lang.non-exist", lang=lang))
 

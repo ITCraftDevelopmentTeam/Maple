@@ -9,7 +9,6 @@ from nonebot.matcher import Matcher
 from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11 import Message, MessageEvent, escape
 
-
 from ._lang import text, LangType
 from ._store import JsonDict
 from ._onebot import (
@@ -26,7 +25,7 @@ cave = CommandGroup("cave", aliases={"cav"})
 
 @cave.command(tuple()).handle()
 async def cave_handle(event: MessageEvent) -> None:
-    await read_cave(
+    await send_cave(
         cave_id=choice(list(caves.keys())),
         lang=event,
         user_id=event.user_id,
@@ -60,7 +59,7 @@ async def cave_get_handle(
     event: MessageEvent,
     arg: Message = CommandArg()
 ) -> None:
-    await read_cave(
+    await send_cave(
         cave_id=str(arg).strip(),
         lang=event,
         user_id=event.user_id,
@@ -107,7 +106,7 @@ async def cave_remove_handle(
     await matcher.send(text(event, "cave.no-permission", cave_id=cave_id))
 
 
-async def read_cave(
+async def send_cave(
     cave_id: str,
     lang: LangType,
     group_id: Optional[GroupID] = None,

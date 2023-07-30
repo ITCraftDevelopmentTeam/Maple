@@ -18,7 +18,7 @@ SPECIAL_PATTERN = r"\[CQ:(" + "|".join([
     "contact",  "location", "music",    "reply",    "redbag",   "poke",
     "gift",     "forward",  "node",     "xml",      "json",     "cardimage",
     "tts"
-]) + r"),.*?\]|\[CQ:image,.*?type=(flash|show).*?\]]"
+]) + r"),.*?\]|\[CQ:image,.*?type=(flash|send).*?\]]"
 
 
 async def send_group_msg(
