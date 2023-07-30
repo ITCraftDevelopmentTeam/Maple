@@ -1,7 +1,7 @@
 from typing import Optional
 
 from nonebot.rule import Rule
-from nonebot.adapters.onebot.v11 import Event
+from nonebot.adapters.onebot.v11.event import Event
 
 from ._onebot import UserID, GroupID
 

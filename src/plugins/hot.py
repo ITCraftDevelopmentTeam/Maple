@@ -38,7 +38,7 @@ async def hot_counter_handle(event: GroupMessageEvent) -> None:
 
 @hot.command(tuple()).handle()
 async def hot_handle(event: MessageEvent) -> None:
-    await show_rank("hot.10min", [
+    await show_rank(event, "hot.10min", [
         (group_id, len(filter_stamps(group_stamps, 10*MINUTE)))
         for group_id, group_stamps in stamps.items()
     ])
@@ -46,7 +46,7 @@ async def hot_handle(event: MessageEvent) -> None:
 
 @hot.command("hour").handle()
 async def hot_hour_handle(event: MessageEvent) -> None:
-    await show_rank("hot.hour", [
+    await show_rank(event, "hot.hour", [
         (group_id, len(filter_stamps(group_stamps, HOUR)))
         for group_id, group_stamps in stamps.items()
     ])
@@ -54,12 +54,12 @@ async def hot_hour_handle(event: MessageEvent) -> None:
 
 @hot.command("day").handle()
 async def hot_day_handle(event: MessageEvent) -> None:
-    await show_rank("hot.day", day.items())
+    await show_rank(event, "hot.day", day.items())
 
 
 @hot.command("total").handle()
 async def hot_total_handle(event: MessageEvent) -> None:
-    await show_rank("hot.total", total.items())
+    await show_rank(event, "hot.total", total.items())
 
 
 @scheduler.scheduled_job("cron", minute="*/10", id="update_stamps")

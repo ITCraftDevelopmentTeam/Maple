@@ -2,7 +2,8 @@ from typing import Optional
 
 from nonebot import get_bot
 from nonebot.adapters import Message, MessageSegment, MessageTemplate
-from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
+from nonebot.adapters.onebot.v11.event import MessageEvent, GroupMessageEvent
+from nonebot.adapters.onebot.v11.exception import ActionFailed
 
 UserID = GroupID = MessageID = str | int
 AnyMessage = str | Message | MessageSegment | MessageTemplate
@@ -213,13 +214,16 @@ async def get_user_name(
         try:
             info = await get_group_member_info(group_id, user_id, no_cache)
             return info["card"] or info["nickname"]
-        except:
+        except ActionFailed:
             pass
     return (await get_stranger_info(int(user_id), no_cache))["nickname"]
 
 
 async def get_group_name(group_id: GroupID) -> str:
-    return (await get_group_info(group_id))["group_name"]
+    try:
+        return (await get_group_info(group_id))["group_name"]
+    except ActionFailed:
+        return str(group_id)
 
 
 async def get_msg(

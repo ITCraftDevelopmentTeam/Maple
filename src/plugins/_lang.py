@@ -5,7 +5,7 @@ from typing import Optional, Any, Literal   # this `Literal` is for `eval`
 
 import yaml
 
-from nonebot.adapters.onebot.v11 import MessageEvent
+from nonebot.adapters.onebot.v11.event import MessageEvent
 
 from ._onebot import UserID
 from ._store import JsonDict
