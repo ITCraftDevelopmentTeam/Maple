@@ -1,6 +1,6 @@
 [简体中文](https://github.com/ITCraftDevelopmentTeam/Maple/blob/master/README.md) | English
 
-![Maple](https://socialify.git.ci/ITCraftDevelopmentTeam/Maple/image?description=1&descriptionEditable=A%20Easy%20and%20Light%20QQ%20Bot&font=Inter&forks=1&issues=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FITCraftDevelopmentTeam%2FMaple%2Fmaster%2Flogo.svg&name=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Light)
+![Maple](https://socialify.git.ci/ITCraftDevelopmentTeam/Maple/image?description=1&descriptionEditable=A%20Easy%20and%20Light%20Bot&font=Inter&forks=1&issues=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FITCraftDevelopmentTeam%2FMaple%2Fmaster%2Flogo.svg&name=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Light)
 
 <div align="center">
   <img alt="license MIT" src="https://img.shields.io/badge/license-MIT-green">
@@ -10,7 +10,7 @@
 </div>
 
 ## Intro
-`ITCraftDevelopmentTeam/Maple` (hereinafter referred to as `Maple`) is a QQ bot which is based on `NoneBot2` and `OneBot 11`.
+`ITCraftDevelopmentTeam/Maple` (hereinafter referred to as `Maple`) is a bot which is based on `NoneBot2` and `OneBot 11`.
 
 ## Thanks
 - [IT Craft Development Team](https://itcdt.top)
