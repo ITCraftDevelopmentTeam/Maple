@@ -16,8 +16,8 @@ REPLY_PATTERN = r"\[CQ:reply,id=(-?\d+)\]"
 SPECIAL_PATTERN = r"\[CQ:(" + "|".join([
     "record",   "video",    "rps",      "dice",     "shake",    "share",
     "contact",  "location", "music",    "reply",    "redbag",   "poke",
-    "gift",     "forward",  "node",     "xml",      "json",     "cardimage",
-    "tts"
+    "gift",     "forward",  "node",     "xml",      "json",     "tts",
+    "cardimage"
 ]) + r"),.*?\]|\[CQ:image,.*?type=(flash|show).*?\]]"
 
 
@@ -83,7 +83,7 @@ async def send(
     )
 
 
-def get_event_id(event: MessageEvent) -> UserID | GroupID:
+def get_session_id(event: MessageEvent) -> UserID | GroupID:
     return getattr(event, "group_id", event.user_id)
 
 
@@ -191,8 +191,8 @@ async def send_forward_msg(
 ) -> dict[str, int | str]:
     if group_id is not None:
         return await send_group_forward_msg(group_id, messages)
-    if user_id is not None:
-        return await send_private_forward_msg(user_id, messages)
+    assert user_id is not None
+    return await send_private_forward_msg(user_id, messages)
 
 
 async def get_group_msg_history(

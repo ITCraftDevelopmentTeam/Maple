@@ -31,10 +31,16 @@ def get_lang(lang: LangType) -> LangTag:
     return lang
 
 
-def parse(__text: str, /, **kwargs: Any) -> str:
+def parse(__text: str, __lang: LangType, /, **kwargs: Any) -> str:
+    lang = get_lang(__lang)
+
     def repl(match: re.Match[str]) -> str:
         expr = match.group()[2:-2]
-        return str(eval(expr.strip(), kwargs))
+        return str(eval(expr.strip(), {
+            "__lang__": lang,
+            "text": partial(text, lang, **kwargs),
+            **kwargs
+        }))
 
     return re.sub("{{.*?}}", repl, __text, flags=re.DOTALL)
 
@@ -57,9 +63,5 @@ def text(__lang: LangType, __key: str, /, **kwargs: Any) -> Optional[Any]:
         data = gets(langs[lang], key)
 
     if isinstance(data, str):
-        return parse(data, **{
-            "__lang__": lang,
-            "text": partial(text, lang, **kwargs),
-            **kwargs
-        })
+        return parse(data, lang, **kwargs)
     return data

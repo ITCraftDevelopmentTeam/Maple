@@ -16,7 +16,7 @@ from ._credit import credits
 from ._rule import session
 from ._onebot import (
     send, delete_msg,
-    get_event_id,
+    get_session_id,
     UserID, GroupID
 )
 
@@ -66,7 +66,7 @@ async def quick_math_handle(
                     user_id, "quick-math.correct",
                     got=credit, total=credits[user_id]
                 ), at_sender=True)
-                if (get_event_id(succ_event)
+                if (get_session_id(succ_event)
                         in auto_quick_math[succ_event.message_type]):
                     await quick_math_handle(succ_event, "")
 
@@ -74,13 +74,13 @@ async def quick_math_handle(
             await delete_msg(message_id)
 
         case "on":
-            event_id = get_event_id(event)
+            event_id = get_session_id(event)
             if event_id not in auto_quick_math[event.message_type]:
                 auto_quick_math[event.message_type].append(event_id)
             await send(event, text(event, "quick-math.on"))
 
         case "off":
-            event_id = get_event_id(event)
+            event_id = get_session_id(event)
             if event_id in auto_quick_math[event.message_type]:
                 auto_quick_math[event.message_type].remove(event_id)
             await send(event, text(event, "quick-math.off"))

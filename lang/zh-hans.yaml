@@ -86,10 +86,6 @@ hot:
     总群聊热度排行：
     {{ text("hot.rank") }}
 
-who-at-me:
-  empty: "没有关于你的消息呢。。。"
-  expire: "消息已经过期了呢，下次记得早点来哦！"
-
 cave:
   add: "回声洞#{{ cave_id }} 添加成功！"
   text: |-
