@@ -1,6 +1,5 @@
 import os
 from time import time
-from datetime import date
 
 from nonebot import require
 from nonebot import CommandGroup, on_message
@@ -16,15 +15,11 @@ from ._lang import text
 require("nonebot_plugin_apscheduler")
 
 
-def get_day_path() -> str:
-    return os.path.join("hot", "days", f"{date.today().isoformat()}.json")
-
-
 MINUTE = 60
 HOUR = 3600
 
 stamps = JsonDict(os.path.join("hot", "stamps.json"), list[int])
-day = JsonDict(get_day_path(), int)
+day = JsonDict(os.path.join("hot", "day.json"), int)
 total = JsonDict(os.path.join("hot", "total.json"), int)
 hot = CommandGroup("hot")
 
@@ -68,10 +63,10 @@ async def update_stamps() -> None:
         stamps[group_id] = filter_stamps(group_stamps)
 
 
-@scheduler.scheduled_job("cron", day="*", id="update_day_path")
-async def update_day_path() -> None:
-    global day
-    day = JsonDict(get_day_path(), int)
+@scheduler.scheduled_job("cron", day="*", id="update_day")
+async def update_day() -> None:
+    for key in day.keys():
+        day.pop(key)
 
 
 async def show_rank(
