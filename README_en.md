@@ -1,6 +1,6 @@
 [简体中文](https://github.com/ITCraftDevelopmentTeam/Maple/blob/master/README.md) | English
 
-![Maple](https://socialify.git.ci/ITCraftDevelopmentTeam/Maple/image?description=1&descriptionEditable=A%20Easy%20and%20Light%20Bot&font=Inter&forks=1&issues=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FITCraftDevelopmentTeam%2FMaple%2Fmaster%2Flogo.svg&name=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Light)
+![Maple](https://socialify.git.ci/ITCraftDevelopmentTeam/Maple/image?description=1&descriptionEditable=A%20Light%20and%20Easy%20Bot&font=Inter&forks=1&issues=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FITCraftDevelopmentTeam%2FMaple%2Fmaster%2Flogo.svg&name=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Light)
 
 <div align="center">
   <img alt="license MIT" src="https://img.shields.io/badge/license-MIT-green">
@@ -18,6 +18,6 @@
 - [VS Code](https://code.visualstudio.com/)
 - [NoneBot2](https://github.com/nonebot/nonebot2)
 - [OneBot 11](https://11.onebot.dev)
-- [Contributors](https://github.com/ITCraftDevelopmentTeam/Maple/graphs/contributors)：
+- [Contributors](https://github.com/ITCraftDevelopmentTeam/Maple/graphs/contributors):
 
 <img src="https://contrib.rocks/image?repo=ITCraftDevelopmentTeam/Maple" />
