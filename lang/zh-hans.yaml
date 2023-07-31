@@ -29,7 +29,7 @@ help:
     #cave.add [内容]：添加一条 cave
     [回复] #cave.add：将回复的消息添加到 cave
     #cave.comment [cave id] [内容]：评论一条 cave
-    #cave.remove [cave id]：删除一条 cave
+    #cave.remove [cave id] ([comment id])：删除一条 cave 或评论
   quick-math: |-
     quick-math —— 速算
     #quick-math：开启速算

@@ -100,7 +100,7 @@ async def cave_remove_handle(
 ) -> None:
     comment_id = ""
     if " " in (cave_id := str(arg).strip()):
-        cave_id, comment_id = cave_id.split(max_split=1)
+        cave_id, comment_id, *_ = cave_id.split()
     if cave_id not in caves.keys():
         await matcher.finish(text(event, ".cave.non-exist", cave_id=cave_id))
     if comment_id != "":    # remove comment
