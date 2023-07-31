@@ -38,7 +38,16 @@ help:
     #quick-math [on|off]：[开启|关闭]连续速算
   github: |-
     github —— GitHub 查询
-    #github [repo]：查询 repo 的信息
+    {{
+      "\n".join([
+        f"#github [{command}]：查询有关 GitHub {name} 的信息"
+        for command, name in {
+          "repo": "仓库",
+          "issue": "议题",
+          "pull": "拉取"
+        }.items()
+      ])
+    }}
 
 lang:
   non-exist: "语言 {{ lang }} 不存在呢。。。"
@@ -88,7 +97,7 @@ cave:
         {{% cave.cave.desc %}}：
         {{ content }}
         —— {{ sender }}
-      header-only: "{{% cave.cave.desc %}} —— {{ sender }}"
+      without-content: "{{% cave.cave.desc %}} —— {{ sender }}"
     add: "{{% cave.cave.desc %}} 已添加！"
     non-exist: "{{% cave.cave.desc %}} 不存在呢。。。"
     remove:
@@ -122,11 +131,21 @@ quick-math:
     "off": "已关闭连续速算"
 
 github:
-  repo:
-    "": |-
-      仓库：{{ data["full_name"] }}
-      协议：{{ data["license"]["name"] }}
-      简介：{{ data["description"] }}
-      主题：{{ " ".join(data["topics"]) }}
-      语言：{{ data["language"] }} 星标：{{ data["stargazers_count"] }} 复刻：{{ data["forks_count"] }} 议题：{{ data["open_issues_count"] }}
-    non-exist: "仓库 {{ owner }}/{{ repo }} 不存在呢。。。"
+  non-exist: "GitHub/{{ arg }} 不存在呢。。。"
+  nonsupport: "暂时还不支持 {{ arg }} 呢。。。"
+  repo: |-
+    仓库：{{ data["full_name"] }}
+    协议：{{ (data["license"] or {"name": None})["name"] }}
+    简介：{{ data["description"] or None }}
+    主题：{{ " ".join(data["topics"]) or None }}
+    语言：{{ data["language"] }} 星标：{{ data["stargazers_count"] }} 复刻：{{ data["forks_count"] }} 议题：{{ data["open_issues_count"] }}
+  issue: |-
+    议题：{{ data["title"] }}
+    标签：{{ "".join(map(lambda x: f"【{x['name']}】", data["labels"])) or None }}
+    受让人：{{ " ".join(map(lambda x: f"@{x['login']}", data["assignees"])) or None }}
+    {{ data["body"] }}
+  pull: |-
+    拉取：{{ data["title"] }}
+    标签：{{ "".join(map(lambda x: f"【{x['name']}】", data["labels"])) or None }}
+    受让人：{{ " ".join(map(lambda x: f"@{x['login']}", data["assignees"])) or None }}
+    {{ data["body"] }}
