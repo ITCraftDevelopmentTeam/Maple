@@ -8,7 +8,8 @@ help:
           "lang": "语言",
           "hot": "群聊热度排行",
           "cave": "回声洞",
-          "quick-math": "速算"
+          "quick-math": "速算",
+          "github": "GitHub 查询"
         }.items()
       ])
     }}
@@ -29,11 +30,15 @@ help:
     #cave.add [内容]：添加一条 cave
     [回复] #cave.add：将回复的消息添加到 cave
     #cave.comment [cave id] [内容]：评论一条 cave
-    #cave.remove [cave id] ([comment id])：删除一条 cave 或评论
+    #cave.remove [cave id]：删除一条 cave
+    #cave.remove [cave id] [comment id]：删除一条 评论
   quick-math: |-
     quick-math —— 速算
     #quick-math：开启速算
     #quick-math [on|off]：[开启|关闭]连续速算
+  github: |-
+    github —— GitHub 查询
+    #github [repo]：查询 repo 的信息
 
 lang:
   non-exist: "语言 {{ lang }} 不存在呢。。。"
@@ -115,3 +120,13 @@ quick-math:
   auto:
     "on": "已开启连续速算"
     "off": "已关闭连续速算"
+
+github:
+  repo:
+    "": |-
+      仓库：{{ data["full_name"] }}
+      协议：{{ data["license"]["name"] }}
+      简介：{{ data["description"] }}
+      主题：{{ " ".join(data["topics"]) }}
+      语言：{{ data["language"] }} 星标：{{ data["stargazers_count"] }} 复刻：{{ data["forks_count"] }} 议题：{{ data["open_issues_count"] }}
+    non-exist: "仓库 {{ owner }}/{{ repo }} 不存在呢。。。"
