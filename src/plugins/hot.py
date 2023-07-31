@@ -1,8 +1,8 @@
 import os
+from functools import partial
 from time import time
 
-from nonebot import require
-from nonebot import CommandGroup, on_message
+from nonebot import require, on_message, CommandGroup
 from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
 
 require("nonebot_plugin_apscheduler")
@@ -14,13 +14,15 @@ from ._store import JsonDict
 from ._onebot import send, get_group_name, GroupID
 
 
-MINUTE = 60
-HOUR = 3600
+text = partial(text, prefix="hot")
 
 stamps = JsonDict(os.path.join("hot", "stamps.json"), list[int])
 day = JsonDict(os.path.join("hot", "day.json"), int)
 total = JsonDict(os.path.join("hot", "total.json"), int)
 hot = CommandGroup("hot")
+
+MINUTE = 60
+HOUR = 3600
 
 
 @on_message().handle()
@@ -31,8 +33,8 @@ async def hot_counter_handle(event: GroupMessageEvent) -> None:
 
 
 @hot.command(tuple()).handle()
-async def hot_handle(event: MessageEvent) -> None:
-    await send_hot(event, "hot.10min", [
+async def hot_10min_handle(event: MessageEvent) -> None:
+    await send_hot(event, ".10min", [
         (group_id, len(filter_stamps(group_stamps, 10*MINUTE)))
         for group_id, group_stamps in stamps.items()
     ])
@@ -40,7 +42,7 @@ async def hot_handle(event: MessageEvent) -> None:
 
 @hot.command("hour").handle()
 async def hot_hour_handle(event: MessageEvent) -> None:
-    await send_hot(event, "hot.hour", [
+    await send_hot(event, ".hour", [
         (group_id, len(filter_stamps(group_stamps, HOUR)))
         for group_id, group_stamps in stamps.items()
     ])
@@ -48,12 +50,12 @@ async def hot_hour_handle(event: MessageEvent) -> None:
 
 @hot.command("day").handle()
 async def hot_day_handle(event: MessageEvent) -> None:
-    await send_hot(event, "hot.day", day.items())
+    await send_hot(event, ".day", day.items())
 
 
 @hot.command("total").handle()
 async def hot_total_handle(event: MessageEvent) -> None:
-    await send_hot(event, "hot.total", total.items())
+    await send_hot(event, ".total", total.items())
 
 
 @scheduler.scheduled_job("cron", minute="*/10", id="update_stamps")

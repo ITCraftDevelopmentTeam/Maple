@@ -4,7 +4,7 @@ help:
     {{
       "\n".join([
         f"#help {command}：查看关于 {name} 的帮助"
-        for (command, name) in {
+        for command, name in {
           "lang": "语言",
           "hot": "群聊热度排行",
           "cave": "回声洞",
@@ -36,6 +36,8 @@ help:
     #quick-math [on|off]：[开启|关闭]连续速算
 
 lang:
+  non-exist: "语言 {{ lang }} 不存在呢。。。"
+  set: "已成功设置语言为 {{ lang }}"
   list: |-
     当前可用语言：
     {{
@@ -46,56 +48,70 @@ lang:
         for lang in langs
       ])
     }}
-  set: "已成功设置语言为 {{ lang }}"
   add: "如果你能熟练使用 GitHub 的话，请到 ITCraftDevelopmentTeam/Maple 发起拉取请求"
-
-quick-math:
-  "on": "已开启连续速算"
-  "off": "已关闭连续速算"
-  eggs:
-    0 / 0 = ?: "[iI][nN][fF]([iI][nN][iI][tT][yY])?|[nN]a[nN]|ZeroDivisionError"
-    creeper?: "[aA][wW]+.*?[mM][aA][N].*?"
-    undefined + undefined = ?: "[iI][nN][fF]([iI][nN][iI][tT][yY])?|[nN][aA][nN]|[uU][nN][dD][fF][iI][nN][eE][dD]"
-    114 + 514 = ?: "哼+啊+|114|514|114514|1919|810|1919810"
-  question: "{{ a }} {{ op }} {{ b }} = ?"
-  correct: |-
-    回答正确！
-    恭喜你获得了{{ got }}点 credit！
-    你当前拥有{{ total }}点 credit！
 
 hot:
   rank: |-
     {{
       "\n".join([
-        f"> {index + 1}. {group_name}: {count}"
+        f"> {index + 1}. {group_name}：{count}"
         if group_id == event.group_id else
-        f"- {index + 1}. {group_name}: {count}"
+        f"- {index + 1}. {group_name}：{count}"
         for index, (group_name, count, group_id) in enumerate(ranks[:11])
       ]) if ranks else "没有群聊发言呢。。。"
     }}
   10min: |-
     近十分钟群聊热度排行：
-    {{ text("hot.rank") }}
+    {{% hot.rank %}}
   hour: |-
     近一小时群聊热度排行：
-    {{ text("hot.rank") }}
+    {{% hot.rank %}}
   day: |-
     今日群聊热度排行：
-    {{ text("hot.rank") }}
+    {{% hot.rank %}}
   total: |-
     总群聊热度排行：
-    {{ text("hot.rank") }}
+    {{% hot.rank %}}
 
 cave:
-  add: "回声洞#{{ cave_id }} 添加成功！"
-  text: |-
-    回声洞#{{ cave_id }}：
-    {{ content }}
-    —— {{ sender }}
-  title: "回声洞#{{ cave_id }} —— {{ sender }}"
   empty: "回声洞里空空如也呢，快去投稿吧！"
-  non-exist: "回声洞#{{ cave_id }} 不存在呢。。。"
-  remove: "回声洞#{{ cave_id }} 已成功删除！"
-  no-permission: "你没有权限删除回声洞#{{ cave_id }} 呢。。。"
-  comment: "回声洞#{{ cave_id }} 下的评论#{{ comment_id }} 已成功添加！"
-  comment-title: "来自 {{ sender }} 的评论#{{ comment_id }}"
+
+  cave:
+    desc: "回声洞#{{ cave_id }}"
+    text:
+      "": |-
+        {{% cave.cave.desc %}}：
+        {{ content }}
+        —— {{ sender }}
+      header-only: "{{% cave.cave.desc %}} —— {{ sender }}"
+    add: "{{% cave.cave.desc %}} 已添加！"
+    non-exist: "{{% cave.cave.desc %}} 不存在呢。。。"
+    remove:
+      "": "{{% cave.cave.desc %}} 已删除！"
+      no-permission: "你没有权限删除 {{% cave.cave.desc %}} 呢。。。"
+
+  comment:
+    desc:
+      "": "{{% cave.cave.desc %}} 下的 {{% cave.comment.desc.pure %}}"
+      pure: "评论#{{ comment_id }}"
+    text: "来自 {{ sender }} 的 {{% cave.comment.desc.pure %}}"
+    add: "{{% cave.comment.desc %}} 已添加！"
+    non-exist: "{{% cave.comment.desc %}} 不存在呢。。。"
+    remove:
+      "": "{{% cave.comment.desc %}} 已删除！"
+      no-permission: "你没有权限删除 {{% cave.comment.desc %}} 呢。。。"
+
+quick-math:
+  question: "{{ a }} {{ op }} {{ b }} = ?"
+  correct: |-
+    回答正确！
+    恭喜你获得了{{ got }}点 credit！
+    你当前拥有{{ total }}点 credit！
+  eggs:
+    0 / 0 = ?: "[nN]a[nN]|ZeroDivisionError"
+    creeper?: "[aA][wW]+.*?[mM][aA][N].*?"
+    undefined + undefined = ?: "[nN][aA][nN]|[uU][nN][dD][fF][iI][nN][eE][dD]"
+    114 + 514 = ?: "哼+啊+|114514|1919810"
+  auto:
+    "on": "已开启连续速算"
+    "off": "已关闭连续速算"

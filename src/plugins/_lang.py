@@ -5,10 +5,10 @@ from typing import Optional, Any, Literal   # this `Literal` is for `eval`
 
 import yaml
 
-from nonebot.adapters.onebot.v11.event import MessageEvent
+from nonebot.adapters.onebot.v11 import MessageEvent
 
-from ._store import JsonDict
 from ._onebot import UserID
+from ._store import JsonDict
 
 
 lang_use = JsonDict("lang_use.json", lambda: "zh-hans")
@@ -31,26 +31,42 @@ def get_lang(lang: LangType) -> LangTag:
     return lang
 
 
-def parse(__text: str, __lang: LangType, /, **kwargs: Any) -> str:
-    lang = get_lang(__lang)
+def parse(__string: str, __lang: LangType, /, **kwargs: Any) -> str:
+    string, lang = __string.strip(), get_lang(__lang)
 
-    def repl(match: re.Match[str]) -> str:
-        expr = match.group()[2:-2]
-        return str(eval(expr.strip(), {
+    string = re.sub(
+        pattern="{{%.*?%}}",
+        repl=lambda macth: "{{ text('" + macth.group()[3:-3].strip() + "') }}",
+        string=string,
+        flags=re.DOTALL
+    )
+    string = re.sub(
+        pattern="{{.*?}}",
+        repl=lambda macth: str(eval(macth.group()[2:-2].strip(), {
             "__lang__": lang,
             "text": partial(text, lang, **kwargs),
             **kwargs
-        }))
+        })),
+        string=string,
+        flags=re.DOTALL
+    )
 
-    return re.sub("{{.*?}}", repl, __text, flags=re.DOTALL)
+    return string.replace("\{", "{").replace("\}", "}")
 
 
-def text(__lang: LangType, __key: str, /, **kwargs: Any) -> Optional[Any]:
-    lang, key = get_lang(__lang), __key
+def text(
+    __lang: LangType,
+    __key: str,
+    /,
+    prefix: Optional[str] = "",
+    escape_blank_key: bool = True,
+    **kwargs: Any
+) -> Optional[Any]:
+    lang, key = get_lang(__lang), prefix + __key
 
-    def gets(data: dict, __key: str) -> Optional[Any]:
+    def gets(data: dict, key: str) -> Optional[Any]:
         try:
-            for subkey in __key.split("."):
+            for subkey in key.split("."):
                 data = data[subkey]
         except KeyError:
             data = None
@@ -62,6 +78,8 @@ def text(__lang: LangType, __key: str, /, **kwargs: Any) -> Optional[Any]:
         lang = lang_use.default_factory()
         data = gets(langs[lang], key)
 
+    if escape_blank_key and isinstance(data, dict) and "" in data.keys():
+        data = data[""]
     if isinstance(data, str):
         return parse(data, lang, **kwargs)
     return data

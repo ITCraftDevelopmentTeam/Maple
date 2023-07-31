@@ -1,6 +1,6 @@
 import re
-from random import choice
 from functools import partial
+from random import choice
 from typing import Optional, cast
 
 from nonebot import get_bot
@@ -10,21 +10,22 @@ from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11 import Message, MessageEvent, escape
 
 from ._lang import text, LangType
-from ._store import JsonDict
 from ._onebot import (
     UserID, GroupID,
     send_msg, get_msg, get_user_name,
     send_forward_msg, custom_forward_node,
     REPLY_PATTERN, SPECIAL_PATTERN
 )
+from ._store import JsonDict
 
 
-caves = JsonDict("caves.json", dict[str, dict[str, int | str | list[dict]]])
+text = partial(text, prefix="cave")
+caves = JsonDict("caves.json", dict)
 cave = CommandGroup("cave", aliases={"cav"})
 
 
 @cave.command(tuple()).handle()
-async def cave_handle(event: MessageEvent) -> None:
+async def cave_random_handle(event: MessageEvent) -> None:
     await send_cave(
         cave_id=choice(list(caves.keys())),
         lang=event,
@@ -51,7 +52,7 @@ async def cave_add_handle(
         cave_id += 1
     cave_id = str(cave_id)
     caves[cave_id] = {"content": content, "user_id": user_id}
-    await matcher.send(text(event, "cave.add", cave_id=cave_id))
+    await matcher.send(text(event, ".cave.add", cave_id=cave_id))
 
 
 @cave.command("get").handle()
@@ -75,18 +76,19 @@ async def cave_comment_handle(
 ) -> None:
     cave_id, content = str(arg).strip().split(maxsplit=1)
     if cave_id not in caves.keys():
-        await matcher.finish(text(event, "cave.non-exist", cave_id=cave_id))
+        await matcher.finish(text(event, ".cave.non-exist", cave_id=cave_id))
     if "comments" not in caves[cave_id].keys():
-        caves[cave_id]["comments"] = []
-    cast(list, caves[cave_id]["comments"]).append({
+        caves[cave_id]["comments"] = {}
+    comment_id = len(caves[cave_id]["comments"])
+    caves[cave_id]["comments"][comment_id] = {
         "user_id": event.user_id,
         "content": content,
         "time": event.time
-    })
+    }
     await matcher.send(text(
-        event, "cave.comment",
+        event, ".comment.add",
         cave_id=cave_id,
-        comment_id=len(caves[cave_id]["comments"]) - 1
+        comment_id=comment_id
     ))
 
 
@@ -96,14 +98,41 @@ async def cave_remove_handle(
     event: MessageEvent,
     arg: Message = CommandArg()
 ) -> None:
-    cave_id = str(arg).strip()
+    comment_id = ""
+    if " " in (cave_id := str(arg).strip()):
+        cave_id, comment_id = cave_id.split(max_split=1)
     if cave_id not in caves.keys():
-        await matcher.finish(text(event, "cave.non-exist", cave_id=cave_id))
-    if (str(event.user_id) in get_bot().config.superusers
-            or event.user_id == caves[cave_id]["user_id"]):
-        caves.pop(cave_id)
-        await matcher.finish(text(event, "cave.remove", cave_id=cave_id))
-    await matcher.send(text(event, "cave.no-permission", cave_id=cave_id))
+        await matcher.finish(text(event, ".cave.non-exist", cave_id=cave_id))
+    if comment_id != "":    # remove comment
+        comments = caves[cave_id].get("comments", {})
+        if comment_id not in comments.keys():
+            await matcher.finish(text(
+                event, ".comment.non-exist",
+                cave_id=cave_id,
+                comment_id=comment_id
+            ))
+        if (str(event.user_id) in get_bot().config.superusers
+                or event.user_id == comments[comment_id]["user_id"]):
+            caves.pop(cave_id)
+            await matcher.finish(text(
+                event, ".comment.remove",
+                cave_id=cave_id,
+                comment_id=comment_id
+            ))
+        await matcher.send(text(
+            event, ".comment.remove.no-permission",
+            cave_id=cave_id,
+            comment_id=comment_id
+        ))
+    else:                   # remove cave
+        if (str(event.user_id) in get_bot().config.superusers
+                or event.user_id == caves[cave_id]["user_id"]):
+            caves.pop(cave_id)
+            await matcher.finish(text(event, ".cave.remove", cave_id=cave_id))
+        await matcher.send(text(
+            event, ".cave.remove.no-permission",
+            cave_id=cave_id
+        ))
 
 
 async def send_cave(
@@ -112,7 +141,6 @@ async def send_cave(
     group_id: Optional[GroupID] = None,
     user_id: Optional[UserID] = None
 ) -> None:
-    caves = JsonDict("caves.json", dict)
     send = partial(send_msg, user_id=user_id, group_id=group_id)
     if cave_id in caves.keys():
         message = caves[cave_id]
@@ -121,14 +149,14 @@ async def send_cave(
         sender = escape(await get_user_name(user_id, group_id))
         if re.search(SPECIAL_PATTERN, content):
             await send(Message(text(
-                lang, "cave.title",
+                lang, ".cave.text.without-content",
                 cave_id=cave_id,
                 sender=sender
             )))
             await send(Message(content))
         else:
             await send(Message(text(
-                lang, "cave.text",
+                lang, ".cave.text",
                 cave_id=cave_id,
                 content=content,
                 sender=sender
@@ -139,13 +167,13 @@ async def send_cave(
                     (user_id := comment["user_id"]),
                     content=comment["content"],
                     name=text(
-                        lang, "cave.comment-title",
+                        lang, ".comment.text",
                         sender=await get_user_name(user_id),
                         comment_id=comment_id
                     ),
                     group_id=group_id,
                     time=comment["time"]
-                ) for comment_id, comment in enumerate(comments)
+                ) for comment_id, comment in cast(dict, comments).items()
             ], user_id=user_id, group_id=group_id)
     else:
-        await send(text(lang, "cave.non-exist", cave_id=cave_id))
+        await send(text(lang, ".cave.non-exist", cave_id=cave_id))

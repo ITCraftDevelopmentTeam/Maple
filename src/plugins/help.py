@@ -14,5 +14,6 @@ async def help_handle(
     event: MessageEvent,
     arg: Message = CommandArg()
 ) -> None:
-    if (key := str(arg)) in (helps := cast(dict, text(event, "help"))).keys():
-        await matcher.send(parse(helps[key]))
+    helps = cast(dict, text(event, "help", escape_blank_key=False))
+    if (key := str(arg)) in helps.keys():
+        await matcher.send(parse(helps[key], event))
