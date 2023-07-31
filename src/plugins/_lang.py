@@ -64,12 +64,9 @@ def text(
 ) -> Optional[Any]:
     lang, key = get_lang(__lang), prefix + __key
 
-    def gets(data: dict, key: str) -> Optional[Any]:
-        try:
-            for subkey in key.split("."):
-                data = data[subkey]
-        except KeyError:
-            data = None
+    def gets(data: dict, key: str) -> Optional[Any]: 
+        for subkey in key.split("."):
+            data = data[subkey]
         return data
 
     try:
