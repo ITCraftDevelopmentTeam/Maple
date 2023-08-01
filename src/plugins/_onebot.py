@@ -48,38 +48,43 @@ async def send_private_msg(
 
 
 async def send_msg(
-    message: AnyMessage,
-    auto_escape: bool = False,
+    message: AnyMessage | list[ForwardNode],
+    user_id: Optional[UserID] = None,
     group_id: Optional[GroupID] = None,
-    user_id: Optional[UserID] = None
+    auto_escape: bool = False
 ) -> MessageID:
-    kwargs = {}
     if group_id is not None:
-        kwargs["group_id"] = int(group_id)
-    elif user_id is not None:
-        kwargs["user_id"] = int(user_id)
-
+        return (await get_bot().send_msg(
+            message=message,
+            auto_escape=auto_escape,
+            group_id=group_id
+        ))["message_id"]
+    assert user_id is not None
     return (await get_bot().send_msg(
         message=message,
         auto_escape=auto_escape,
-        **kwargs
+        user_id=user_id
     ))["message_id"]
 
 
 async def send(
     event:  MessageEvent,
-    message: AnyMessage,
+    message: AnyMessage | list[ForwardNode],
     auto_escape: bool = False
 ) -> MessageID:
-    if isinstance(event, GroupMessageEvent):
-        kwargs = {"group_id": event.group_id}
-    else:
-        kwargs = {"user_id": event.user_id}
-
+    user_id = event.user_id
+    group_id = getattr(event, "group_id", None)
+    if type(message) == list:
+        return await send_forward_msg(
+            messages=message,
+            user_id=user_id,
+            group_id=group_id
+        )
     return await send_msg(
         message=message,
         auto_escape=auto_escape,
-        **kwargs
+        user_id=user_id,
+        group_id=group_id
     )
 
 
@@ -124,34 +129,26 @@ async def get_stranger_info(
 
 
 async def custom_forward_node(
-    user_id: UserID,
     content: AnyMessage | list[ForwardNode],
-    name: Optional[str] = None,
+    user_id: UserID,
     group_id: Optional[GroupID] = None,
-    time: Optional[int | str] = None
+    name: Optional[str] = None,
+    time: Optional[int] = None
 ) -> ForwardNode:
     if name is None:
         name = await get_user_name(user_id, group_id)
-    node: ForwardNode = {
-        "type": "node",
-        "data": {
-            "name": name,
-            "uin": str(user_id),
-            "content": content
-        }
-    }
+    node: ForwardNode = {"type": "node", "data": {
+        "name": name,
+        "uin": str(user_id),
+        "content": content
+    }}
     if time is not None:
-        node["data"]["time"] = int(time)
+        node["data"]["time"] = time
     return node
 
 
 def referencing_forward_node(id: MessageID) -> ForwardNode:
-    return {
-        "type": "node",
-        "data": {
-            "id": str(id)
-        }
-    }
+    return {"type": "node", "data": {"id": str(id)}}
 
 
 async def send_group_forward_msg(

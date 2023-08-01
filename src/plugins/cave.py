@@ -9,11 +9,10 @@ from nonebot.matcher import Matcher
 from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11 import Message, MessageEvent, escape
 
-from ._lang import text, LangType
+from ._lang import text
 from ._onebot import (
-    UserID, GroupID,
-    send_msg, get_msg, get_user_name,
-    send_forward_msg, custom_forward_node,
+    ForwardNode,
+    send, get_msg, get_user_name, custom_forward_node,
     REPLY_PATTERN, SPECIAL_PATTERN
 )
 from ._store import JsonDict
@@ -26,12 +25,7 @@ cave = CommandGroup("cave", aliases={"cav"})
 
 @cave.command(tuple()).handle()
 async def cave_random_handle(event: MessageEvent) -> None:
-    await send_cave(
-        cave_id=choice(list(caves.keys())),
-        lang=event,
-        user_id=event.user_id,
-        group_id=getattr(event, "group_id", None)
-    )
+    await send_cave(choice(list(caves.keys())), event)
 
 
 @cave.command("add").handle()
@@ -57,15 +51,35 @@ async def cave_add_handle(
 
 @cave.command("get").handle()
 async def cave_get_handle(
+    matcher: Matcher,
     event: MessageEvent,
     arg: Message = CommandArg()
 ) -> None:
-    await send_cave(
-        cave_id=str(arg).strip(),
-        lang=event,
-        user_id=event.user_id,
-        group_id=getattr(event, "group_id", None)
-    )
+    cave_id = str(arg).strip()
+    if "-" in cave_id and str(event.user_id) in get_bot().config.superusers:
+        start, end, *_ = cave_id.split("-")
+        if not (start.isdecimal() and end.isdecimal()):
+            await matcher.finish(text(event, ".cave.non-exist", cave_id))
+        await send(event, [
+            await custom_forward_node(
+                user_id=(user_id := caves[cave_id]["user_id"]),
+                group_id=(group_id := getattr(event, "group_id", None)),
+                content=[
+                    await custom_forward_node(
+                        content=message,
+                        user_id=user_id,
+                        group_id=group_id,
+                        name=await get_user_name(user_id, group_id)
+                    )
+                    for message in await get_cave(cave_id, event)
+                ],
+                name=await get_user_name(user_id, group_id)
+            )
+            for cave_id in map(str, range(int(start), int(end) + 1))
+            if cave_id in caves.keys()
+        ])
+        await matcher.finish()
+    await send_cave(cave_id, event)
 
 
 @cave.command("comment", aliases={"cmt"}).handle()
@@ -135,45 +149,49 @@ async def cave_remove_handle(
         ))
 
 
-async def send_cave(
+async def get_cave(
     cave_id: str,
-    lang: LangType,
-    group_id: Optional[GroupID] = None,
-    user_id: Optional[UserID] = None
-) -> None:
-    send = partial(send_msg, user_id=user_id, group_id=group_id)
+    event: MessageEvent
+) -> list[Message | list[ForwardNode]]:
+    group_id = getattr(event, "group_id", None)
+    ret = []
     if cave_id in caves.keys():
         message = caves[cave_id]
         user_id = message["user_id"]
         content = message["content"]
         sender = escape(await get_user_name(user_id, group_id))
         if re.search(SPECIAL_PATTERN, content):
-            await send(Message(text(
-                lang, ".cave.text.without-content",
+            ret.extend([Message(text(
+                event, ".cave.text.without-content",
                 cave_id=cave_id,
                 sender=sender
-            )))
-            await send(Message(content))
+            )), Message(content)])
         else:
-            await send(Message(text(
-                lang, ".cave.text",
+            ret.append(Message(text(
+                event, ".cave.text",
                 cave_id=cave_id,
                 content=content,
                 sender=sender
             )))
         if comments := caves[cave_id].get("comments"):
-            await send_forward_msg([
+            ret.append([
                 await custom_forward_node(
-                    (user_id := comment["user_id"]),
-                    content=comment["content"],
+                    comment["content"],
+                    user_id := comment["user_id"],
+                    group_id=group_id,
                     name=text(
-                        lang, ".comment.text",
+                        event, ".comment.text",
                         sender=await get_user_name(user_id),
                         comment_id=comment_id
                     ),
-                    group_id=group_id,
                     time=comment["time"]
                 ) for comment_id, comment in cast(dict, comments).items()
-            ], user_id=user_id, group_id=group_id)
+            ])
     else:
-        await send(text(lang, ".cave.non-exist", cave_id=cave_id))
+        ret.append(text(event, ".cave.non-exist", cave_id=cave_id))
+    return ret
+
+
+async def send_cave(cave_id: str, event: MessageEvent) -> None:
+    for message in await get_cave(cave_id, event):
+        await send(event, message)
