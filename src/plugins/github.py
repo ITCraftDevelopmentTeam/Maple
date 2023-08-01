@@ -21,7 +21,7 @@ async def github_handle(
 ) -> None:
     arg: str = str(arg).replace("https://github.com", "").strip(" /")
     if len(args := arg.split("/")) >= 3 and args[2] == "pull":
-        args[2] = "pulls"       # fuck you, GayHub!
+        args[2] = "pulls"       # Fuck you, GayHub!
         arg = "/".join(args)
     url = f"https://api.github.com/repos/{arg}"
     data: dict = requests.get(url, verify=False).json()
