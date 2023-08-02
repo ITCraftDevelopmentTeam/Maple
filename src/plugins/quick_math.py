@@ -23,7 +23,7 @@ from ._store import JsonDict
 
 text = partial(text, prefix="quick-math")
 
-auto_quick_math = JsonDict("auto_quick_math.json", list[UserID | GroupID])
+disableds = JsonDict("quick-math.disableds.json", list[UserID] | list[GroupID])
 
 EXPIRE_TIME = timedelta(seconds=10)
 
@@ -70,7 +70,7 @@ async def quick_math_handle(
                     got=credit, total=credits[user_id]
                 ), at_sender=True)
                 if (get_session_id(succ_event)
-                        in auto_quick_math[succ_event.message_type]):
+                        not in disableds[succ_event.message_type]):
                     await quick_math_handle(succ_event, "")
 
             await asyncio.sleep(EXPIRE_TIME.total_seconds())
@@ -78,12 +78,12 @@ async def quick_math_handle(
 
         case "on":
             event_id = get_session_id(event)
-            if event_id not in auto_quick_math[event.message_type]:
-                auto_quick_math[event.message_type].append(event_id)
+            if event_id in disableds[event.message_type]:
+                disableds[event.message_type].remove(event_id)
             await send(event, text(event, ".auto.on"))
 
         case "off":
             event_id = get_session_id(event)
-            if event_id in auto_quick_math[event.message_type]:
-                auto_quick_math[event.message_type].remove(event_id)
+            if event_id not in disableds[event.message_type]:
+                disableds[event.message_type].append(event_id)
             await send(event, text(event, ".auto.off"))
