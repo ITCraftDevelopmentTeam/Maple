@@ -1,8 +1,9 @@
+import re
 from typing import Optional
 
 from nonebot import get_bot
 from nonebot.adapters import Message, MessageSegment, MessageTemplate
-from nonebot.adapters.onebot.v11.event import MessageEvent, GroupMessageEvent
+from nonebot.adapters.onebot.v11.event import MessageEvent
 from nonebot.adapters.onebot.v11.exception import ActionFailed
 
 UserID = GroupID = MessageID = str | int
@@ -227,3 +228,13 @@ async def get_msg(
     message_id: MessageID
 ) -> dict[str, str | int | dict[str, str | int]]:
     return await get_bot().get_msg(message_id=int(message_id))
+
+
+async def get_target_ids(raw_message: str) -> set[str]:
+    if hasattr(raw_message, "raw_message"):
+        raw_message = raw_message.raw_message
+    target_ids = set(re.findall(AT_PATTERN, raw_message))
+    if (match := re.match(REPLY_PATTERN, raw_message)):
+        target_ids.add(str((await get_msg(match.group()[13:-1]))
+                           ["sender"]["user_id"]))
+    return {"all"} if "all" in target_ids else target_ids

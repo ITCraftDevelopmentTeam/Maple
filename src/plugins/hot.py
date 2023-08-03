@@ -1,5 +1,5 @@
-import os
 from functools import partial
+from pathlib import Path
 from time import time
 
 from nonebot import require, on_message, CommandGroup
@@ -16,9 +16,9 @@ from ._onebot import send, get_group_name, GroupID
 
 text = partial(text, prefix="hot")
 
-stamps = JsonDict(os.path.join("hot", "stamps.json"), list[int])
-day = JsonDict(os.path.join("hot", "day.json"), int)
-total = JsonDict(os.path.join("hot", "total.json"), int)
+stamps = JsonDict(Path("hot", "stamps.json"), list)
+day = JsonDict(Path("hot", "day.json"), int)
+total = JsonDict(Path("hot", "total.json"), int)
 hot = CommandGroup("hot")
 
 MINUTE = 60

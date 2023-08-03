@@ -1,6 +1,6 @@
-import os
 import re
 from functools import partial
+from pathlib import Path
 from typing import Optional, Any, Literal   # this `Literal` is for `eval`
 
 import yaml
@@ -11,13 +11,11 @@ from ._onebot import UserID
 from ._store import JsonDict
 
 
-lang_use = JsonDict("lang_use.json", lambda: "zh-hans")
+lang_use = JsonDict("lang.use.json", lambda: "zh-hans")
 langs = {}
-for filename in os.listdir("lang"):
-    lang = os.path.splitext(filename)[0]
-    file_path = os.path.join("lang", filename)
-    with open(file_path, "r", encoding="utf-8") as file:
-        langs[lang] = yaml.safe_load(file)
+for path in Path("lang").glob("[!_]*"):
+    with open(path, "r", encoding="utf-8") as file:
+        langs[path.stem] = yaml.safe_load(file)
 LangTag = eval("Literal['" + "','".join(langs.keys()) + "']")
 LangType = LangTag | UserID | MessageEvent
 

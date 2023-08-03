@@ -1,46 +1,45 @@
 import json
-import os
+from pathlib import Path
 from typing import Any, Callable, TypeVar, Generic
 
 
-T = TypeVar("T")
+KT = TypeVar("KT")
+VT = TypeVar("VT")
 
 
-def load_json(path: str, default_factory: Callable[[], T] = dict) -> T:
-    if not os.path.exists(path):
-        return default_factory()
+def load_json(path: Path, default_factory: Callable[[], VT] = dict) -> VT:
+    if not path.exists():
+        data = default_factory()
+        dump_json(data, path)
+        return data
     with open(path, "r", encoding="utf-8") as file:
         return json.load(file)
 
 
-def dump_json(obj: Any, path: str) -> None:
-    if not os.path.exists(os.path.dirname(path)):
-        os.makedirs(os.path.dirname(path))
+def dump_json(obj: Any, path: Path) -> None:
+    if not (parent := path.parent).exists():
+        parent.mkdir()
     with open(path, "w", encoding="utf-8") as file:
         json.dump(obj, file, ensure_ascii=False, indent=2, sort_keys=True)
 
 
-class JsonDict(dict, Generic[T]):
+class JsonDict(dict, Generic[KT, VT]):
     def __init__(
         self,
-        path: str,
-        default_factory: Callable[[], T] = int
+        path: Path,
+        default_factory: Callable[[], VT] = int
     ) -> None:
-        self.path = os.path.join("data", path)
-        data = load_json(self.path)
-        assert isinstance(data, dict)
-        super().__init__(data)
+        self.path = Path("data", path)
+        super().__init__(load_json(self.path))
         self.default_factory = default_factory
 
-    def __getitem__(self, __key: Any) -> T:
-        if __key not in self.keys():
-            super().__setitem__(__key, self.default_factory())
-        dump_json(self, self.path)
-        return super().__getitem__(__key)
+    def __missing__(self, __key: KT) -> VT:
+        return self.default_factory()
 
     def __setitem__(self, __key: Any, __value: Any) -> None:
-        super().__setitem__(__key, __value)
-        dump_json(self, self.path)
+        if __value != self.default_factory():
+            super().__setitem__(__key, __value)
+            dump_json(self, self.path)
 
     def __delitem__(self, __key: Any) -> None:
         super().__delitem__(__key)

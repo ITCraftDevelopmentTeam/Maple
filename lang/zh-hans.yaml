@@ -32,6 +32,7 @@ help:
     #cave.comment [cave id] [内容]：评论一条 cave
     #cave.remove [cave id]：删除一条 cave
     #cave.remove [cave id] [comment id]：删除一条 评论
+    #cave.checkout [branch]：切换分支
   quick-math: |-
     quick-math —— 速算
     #quick-math：开启速算
@@ -89,7 +90,7 @@ hot:
 
 cave:
   empty: "回声洞里空空如也呢，快去投稿吧！"
-
+  checkout: "已成功切换到 分支#{{ branch }}！"
   cave:
     desc: "回声洞#{{ cave_id }}"
     text:
@@ -103,7 +104,6 @@ cave:
     remove:
       "": "{{% cave.cave.desc %}} 已删除！"
       no-permission: "你没有权限删除 {{% cave.cave.desc %}} 呢。。。"
-
   comment:
     desc:
       "": "{{% cave.cave.desc %}} 下的 {{% cave.comment.desc.pure %}}"

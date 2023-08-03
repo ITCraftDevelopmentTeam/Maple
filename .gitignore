@@ -4,3 +4,4 @@ go-cqhttp
 qsign
 __pycache__
 **/!*
+**/_!*
