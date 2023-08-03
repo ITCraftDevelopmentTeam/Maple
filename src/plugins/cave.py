@@ -14,7 +14,7 @@ from nonebot.adapters.onebot.v11 import Message, MessageEvent, escape
 from ._lang import text
 from ._onebot import (
     ForwardNode,
-    send, get_msg, get_user_name, custom_forward_node, get_target_ids,
+    send, get_msg, get_user_name, custom_forward_node, get_session_id,
     REPLY_PATTERN, SPECIAL_PATTERN
 )
 from ._store import JsonDict
@@ -22,13 +22,12 @@ from ._store import JsonDict
 
 text = partial(text, prefix="cave")
 cave = CommandGroup("cave", aliases={"cav"})
-branchs = JsonDict("cave.branchs.json", lambda: "master")
+branchs = JsonDict("cave.branchs.json", lambda: "session")
 
 
 @cave.command(tuple()).handle()
 async def cave_random_handle(event: MessageEvent) -> None:
-    branch = JsonDict(Path("caves", f"{branchs[event.user_id]}.json"), dict)
-    await send_cave(choice(list(branch.keys())), event)
+    await send_cave(choice(list(get_branch(event).keys())), event)
 
 
 @cave.command("add").handle()
@@ -37,7 +36,7 @@ async def cave_add_handle(
     event: MessageEvent,
     arg: Message = CommandArg()
 ) -> None:
-    branch = JsonDict(Path("caves", f"{branchs[event.user_id]}.json"), dict)
+    branch = get_branch(event)
     if founds := re.findall(REPLY_PATTERN, event.raw_message):
         data = await get_msg(founds[0])
         content = data["message"]
@@ -59,7 +58,6 @@ async def cave_get_handle(
     event: MessageEvent,
     arg: Message = CommandArg()
 ) -> None:
-    branch = JsonDict(Path("caves", f"{branchs[event.user_id]}.json"), dict)
     cave_id = str(arg).strip()
     if "-" in cave_id and str(event.user_id) in get_bot().config.superusers:
         start, end, *_ = cave_id.split("-")
@@ -81,7 +79,7 @@ async def cave_get_handle(
                 name=await get_user_name(user_id, group_id)
             )
             for cave_id in map(str, range(int(start), int(end) + 1))
-            if cave_id in branch.keys()
+            if cave_id in (branch := get_branch(event)).keys()
         ])
         await matcher.finish()
     await send_cave(cave_id, event)
@@ -93,9 +91,8 @@ async def cave_comment_handle(
     event: MessageEvent,
     arg: Message = CommandArg()
 ) -> None:
-    branch = JsonDict(Path("caves", f"{branchs[event.user_id]}.json"), dict)
     cave_id, content = str(arg).strip().split(maxsplit=1)
-    if cave_id not in branch.keys():
+    if cave_id not in (branch := get_branch(event)).keys():
         await matcher.finish(text(event, ".cave.non-exist", cave_id=cave_id))
     if "comments" not in branch[cave_id].keys():
         branch[cave_id]["comments"] = {}
@@ -118,11 +115,10 @@ async def cave_remove_handle(
     event: MessageEvent,
     arg: Message = CommandArg()
 ) -> None:
-    branch = JsonDict(Path("caves", f"{branchs[event.user_id]}.json"), dict)
     comment_id = ""
     if " " in (cave_id := str(arg).strip()):
         cave_id, comment_id, *_ = cave_id.split()
-    if cave_id not in branch.keys():
+    if cave_id not in (branch := get_branch(event)).keys():
         await matcher.finish(text(event, ".cave.non-exist", cave_id=cave_id))
     if comment_id != "":    # remove comment
         comments = branch[cave_id].get("comments", {})
@@ -170,10 +166,9 @@ async def get_cave(
     cave_id: str,
     event: MessageEvent
 ) -> list[Message | list[ForwardNode]]:
-    branch = JsonDict(Path("caves", f"{branchs[event.user_id]}.json"), dict)
     group_id = getattr(event, "group_id", None)
     messages = []
-    if cave_id in branch.keys():
+    if cave_id in (branch := get_branch(event)).keys():
         message = branch[cave_id]
         user_id = message["user_id"]
         content = message["content"]
@@ -213,3 +208,9 @@ async def get_cave(
 async def send_cave(cave_id: str, event: MessageEvent) -> None:
     for message in await get_cave(cave_id, event):
         await send(event, message)
+
+def get_branch(event: MessageEvent) -> JsonDict:
+    branch = branchs[event.user_id]
+    if branch == "session":
+        branch = get_session_id(event)
+    return JsonDict(Path("caves", f"{branch}.json"), dict)
