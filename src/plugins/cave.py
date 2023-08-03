@@ -166,17 +166,6 @@ async def cave_checkout_handle(
     await matcher.send(text(event, ".checkout", branch=branch))
 
 
-@cave.command("ban", permission=SUPERUSER).handle()
-async def cave_ban_handle(
-    matcher: Matcher,
-    event: MessageEvent,
-    arg: Message = CommandArg()
-) -> None:
-    assert arg.extract_plain_text().strip() in ("add", "comment", "all")
-    for target_id in (await get_target_ids(event)):
-        await matcher.send(target_id)
-
-
 async def get_cave(
     cave_id: str,
     event: MessageEvent
