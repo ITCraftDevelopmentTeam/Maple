@@ -37,9 +37,8 @@ class JsonDict(dict, Generic[KT, VT]):
         return self.default_factory()
 
     def __setitem__(self, __key: Any, __value: Any) -> None:
-        if __value != self.default_factory():
-            super().__setitem__(__key, __value)
-            dump_json(self, self.path)
+        super().__setitem__(__key, __value)
+        dump_json(self, self.path)
 
     def __delitem__(self, __key: Any) -> None:
         super().__delitem__(__key)
