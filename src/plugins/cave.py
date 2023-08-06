@@ -218,5 +218,5 @@ async def send_cave(cave_id: str, event: MessageEvent) -> None:
 def get_branch(event: MessageEvent) -> JsonDict[str, dict]:
     branch = branchs[str(event.user_id)]
     if branch == "session":
-        branch = get_session_id(event)
+        branch = Path(event.message_type, get_session_id(event))
     return JsonDict(Path("caves", f"{branch}.json"), dict)
