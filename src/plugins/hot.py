@@ -1,3 +1,7 @@
+from ._onebot import send, get_group_name, GroupID
+from ._store import JsonDict
+from ._lang import text
+from nonebot_plugin_apscheduler import scheduler
 from functools import partial
 from pathlib import Path
 from time import time
@@ -6,12 +10,6 @@ from nonebot import require, on_message, CommandGroup
 from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
 
 require("nonebot_plugin_apscheduler")
-
-from nonebot_plugin_apscheduler import scheduler
-
-from ._lang import text
-from ._store import JsonDict
-from ._onebot import send, get_group_name, GroupID
 
 
 text = partial(text, prefix="hot")
@@ -75,13 +73,15 @@ async def send_hot(
     key: str,
     ranks: list[tuple[GroupID, int]]
 ) -> None:
-    ranks = [
+    ranks: list[tuple[str, int, GroupID]] = [
         (await get_group_name(group_id), count, int(group_id))
-        for group_id, count in ranks
-        if count != 0
+        for group_id, count in ranks if count
     ]
-    ranks.sort(key=lambda x: x[1], reverse=True)
-    await send(event, text(event, key, ranks=ranks, event=event))
+    if ranks:
+        ranks.sort(key=lambda x: x[1], reverse=True)
+        await send(event, text(event, key, ranks=ranks, event=event))
+    else:
+        await send(event, text(event, ".none"))
 
 
 def filter_stamps(stamps: list[int], expire_time: int = HOUR) -> list[int]:

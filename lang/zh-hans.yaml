@@ -1,18 +1,16 @@
 help:
   "": |-
     help —— 帮助
-    {{
-      "\n".join([
-        f"#help {command}：查看关于 {name} 的帮助"
-        for command, name in {
-          "lang": "语言",
-          "hot": "群聊热度排行",
-          "cave": "回声洞",
-          "quick-math": "速算",
-          "github": "GitHub 查询"
-        }.items()
-      ])
-    }}
+    {{$
+      f"#help {command}：查看关于 {name} 的帮助"
+      for command, name in {
+        "lang": "语言",
+        "hot": "群聊热度排行",
+        "cave": "回声洞",
+        "quick-math": "速算",
+        "github": "GitHub 查询"
+      }.items()
+    $}}
   lang: |-
     lang —— 语言
     #lang [语言]：设置语言
@@ -39,42 +37,34 @@ help:
     #quick-math [on|off]：[开启|关闭]连续速算
   github: |-
     github —— GitHub 查询
-    {{
-      "\n".join([
-        f"#github [{command}]：查询有关 GitHub {name} 的信息"
-        for command, name in {
-          "repo": "仓库",
-          "issue": "议题",
-          "pull": "拉取"
-        }.items()
-      ])
-    }}
+    {{$
+      f"#github [{command}]：查询有关 GitHub {name} 的信息"
+      for command, name in {
+        "repo": "仓库",
+        "issue": "议题",
+        "pull": "拉取",
+        "commit": "提交"
+      }.items()
+    $}}
 
 lang:
   non-exist: "语言 {{ lang }} 不存在呢。。。"
   set: "已成功设置语言为 {{ lang }}"
   list: |-
     当前可用语言：
-    {{
-      "\n".join([
-        f"> {lang}"
-        if lang == __lang__
-        else f"- {lang}"
-        for lang in langs
-      ])
-    }}
+    {{$
+      (">" if lang == __lang__ else "-") + f" {lang}"
+      for lang in langs
+    $}}
   add: "如果你能熟练使用 GitHub 的话，请到 ITCraftDevelopmentTeam/Maple 发起拉取请求"
 
 hot:
+  none: "没有群聊发言呢。。。"
   rank: |-
-    {{
-      "\n".join([
-        f"> {index + 1}. {group_name}：{count}"
-        if group_id == event.group_id else
-        f"- {index + 1}. {group_name}：{count}"
-        for index, (group_name, count, group_id) in enumerate(ranks[:11])
-      ]) if ranks else "没有群聊发言呢。。。"
-    }}
+    {{$
+      (">" if group_id == event.group_id else "-") + f" {index + 1}. {group_name}：{count}"
+      for index, (group_name, count, group_id) in enumerate(ranks[:11])
+    $}}
   10min: |-
     近十分钟群聊热度排行：
     {{% hot.rank %}}
@@ -136,8 +126,8 @@ github:
   repo: |-
     仓库：{{ data["full_name"] }}
     协议：{{ (data["license"] or {"name": None})["name"] }}
-    简介：{{ data["description"] or None }}
     主题：{{ " ".join(data["topics"]) or None }}
+    简介：{{ data["description"] or None }}
     语言：{{ data["language"] }} 星标：{{ data["stargazers_count"] }} 复刻：{{ data["forks_count"] }} 议题：{{ data["open_issues_count"] }}
   issue: |-
     议题：{{ data["title"] }}

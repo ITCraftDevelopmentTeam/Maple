@@ -31,15 +31,23 @@ def get_lang(lang: LangType) -> LangTag:
 
 def parse(__string: str, __lang: LangType, /, **kwargs: Any) -> str:
     string, lang = __string.strip(), get_lang(__lang)
-
+    # `text`
     string = re.sub(
-        pattern="{{%.*?%}}",
+        pattern=r"{{%.*?%}}",
         repl=lambda macth: "{{ text('" + macth.group()[3:-3].strip() + "') }}",
         string=string,
         flags=re.DOTALL
     )
+    # list comprehension
     string = re.sub(
-        pattern="{{.*?}}",
+        pattern=r"{{\$.*?\$}}",
+        repl=lambda macth: "{{ '\\n'.join([" + macth.group()[3:-3] + "]) }}",
+        string=string,
+        flags=re.DOTALL
+    )
+    # embedded Python code
+    string = re.sub(
+        pattern=r"{{.*?}}",
         repl=lambda macth: str(eval(macth.group()[2:-2].strip(), {
             "__lang__": lang,
             "text": partial(text, lang, **kwargs),
@@ -48,7 +56,6 @@ def parse(__string: str, __lang: LangType, /, **kwargs: Any) -> str:
         string=string,
         flags=re.DOTALL
     )
-
     return string.replace("\{", "{").replace("\}", "}")
 
 
@@ -62,7 +69,7 @@ def text(
 ) -> Optional[Any]:
     lang, key = get_lang(__lang), prefix + __key
 
-    def gets(data: dict, key: str) -> Optional[Any]: 
+    def gets(data: dict, key: str) -> Optional[Any]:
         for subkey in key.split("."):
             data = data[subkey]
         return data

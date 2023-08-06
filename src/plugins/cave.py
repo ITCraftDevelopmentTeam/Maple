@@ -8,7 +8,6 @@ from nonebot import get_bot
 from nonebot import CommandGroup
 from nonebot.matcher import Matcher
 from nonebot.params import CommandArg
-from nonebot.permission import SUPERUSER
 from nonebot.adapters.onebot.v11 import Message, MessageEvent, escape
 
 from ._lang import text
@@ -26,8 +25,10 @@ branchs = JsonDict("cave.branchs.json", lambda: "session")
 
 
 @cave.command(tuple()).handle()
-async def cave_random_handle(event: MessageEvent) -> None:
-    await send_cave(choice(list(get_branch(event).keys())), event)
+async def cave_handle(matcher: Matcher, event: MessageEvent) -> None:
+    if not (branch := get_branch(event)):
+        await matcher.finish(text(event, ".empty"))
+    await send_cave(choice(list(branch.keys())), event)
 
 
 @cave.command("add").handle()
@@ -58,6 +59,8 @@ async def cave_get_handle(
     event: MessageEvent,
     arg: Message = CommandArg()
 ) -> None:
+    if not (branch := get_branch(event)):
+        await matcher.finish(text(event, ".empty"))
     cave_id = str(arg).strip()
     if "-" in cave_id and str(event.user_id) in get_bot().config.superusers:
         start, end, *_ = cave_id.split("-")
@@ -79,7 +82,7 @@ async def cave_get_handle(
                 name=await get_user_name(user_id, group_id)
             )
             for cave_id in map(str, range(int(start), int(end) + 1))
-            if cave_id in (branch := get_branch(event)).keys()
+            if cave_id in branch.keys()
         ])
         await matcher.finish()
     await send_cave(cave_id, event)
@@ -168,40 +171,42 @@ async def get_cave(
 ) -> list[Message | list[ForwardNode]]:
     group_id = getattr(event, "group_id", None)
     messages = []
-    if cave_id in (branch := get_branch(event)).keys():
-        message = branch[cave_id]
-        user_id = message["user_id"]
-        content = message["content"]
-        sender = escape(await get_user_name(user_id, group_id))
-        if re.search(SPECIAL_PATTERN, content):
-            messages.extend([Message(text(
-                event, ".cave.text.without-content",
-                cave_id=cave_id,
-                sender=sender
-            )), Message(content)])
-        else:
-            messages.append(Message(text(
-                event, ".cave.text",
-                cave_id=cave_id,
-                content=content,
-                sender=sender
-            )))
-        if comments := branch[cave_id].get("comments"):
-            messages.append([
-                await custom_forward_node(
-                    comment["content"],
-                    user_id := comment["user_id"],
-                    group_id=group_id,
-                    name=text(
-                        event, ".comment.text",
-                        sender=await get_user_name(user_id),
-                        comment_id=comment_id
-                    ),
-                    time=comment["time"]
-                ) for comment_id, comment in cast(dict, comments).items()
-            ])
+    if not (branch := get_branch(event)):
+        return [text(event, ".cave.empty")]
+    if cave_id not in branch.keys():
+        return [text(event, ".cave.non-exist", cave_id=cave_id)]
+
+    message = branch[cave_id]
+    user_id = message["user_id"]
+    content = message["content"]
+    sender = escape(await get_user_name(user_id, group_id))
+    if re.search(SPECIAL_PATTERN, content):
+        messages.extend([Message(text(
+            event, ".cave.text.without-content",
+            cave_id=cave_id,
+            sender=sender
+        )), Message(content)])
     else:
-        messages.append(text(event, ".cave.non-exist", cave_id=cave_id))
+        messages.append(Message(text(
+            event, ".cave.text",
+            cave_id=cave_id,
+            content=content,
+            sender=sender
+        )))
+    if comments := branch[cave_id].get("comments"):
+        messages.append([
+            await custom_forward_node(
+                comment["content"],
+                user_id := comment["user_id"],
+                group_id=group_id,
+                name=text(
+                    event, ".comment.text",
+                    sender=await get_user_name(user_id),
+                    comment_id=comment_id
+                ),
+                time=comment["time"]
+            ) for comment_id, comment in cast(dict, comments).items()
+        ])
     return messages
 
 
@@ -209,8 +214,9 @@ async def send_cave(cave_id: str, event: MessageEvent) -> None:
     for message in await get_cave(cave_id, event):
         await send(event, message)
 
-def get_branch(event: MessageEvent) -> JsonDict:
-    branch = branchs[event.user_id]
+
+def get_branch(event: MessageEvent) -> JsonDict[str, dict]:
+    branch = branchs[str(event.user_id)]
     if branch == "session":
         branch = get_session_id(event)
     return JsonDict(Path("caves", f"{branch}.json"), dict)
