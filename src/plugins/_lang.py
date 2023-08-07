@@ -31,6 +31,8 @@ def get_lang(lang: LangType) -> LangTag:
 
 def parse(__string: str, __lang: LangType, /, **kwargs: Any) -> str:
     string, lang = __string.strip(), get_lang(__lang)
+    # comment
+    string = re.sub(pattern=r"{{#.*?#}}", string=string, repl="")
     # `text()`
     string = re.sub(
         pattern=r"{{%.*?%}}", string=string,
