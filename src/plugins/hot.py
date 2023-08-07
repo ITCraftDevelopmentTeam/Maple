@@ -24,14 +24,14 @@ HOUR = 3600
 
 
 @on_message().handle()
-async def hot_counter_handle(event: GroupMessageEvent) -> None:
+async def hot_counter_handler(event: GroupMessageEvent) -> None:
     stamps[str(event.group_id)].append(event.time)
     day[str(event.group_id)] += 1
     total[str(event.group_id)] += 1
 
 
 @hot.command(tuple()).handle()
-async def hot_10min_handle(event: MessageEvent) -> None:
+async def hot_10min_handler(event: MessageEvent) -> None:
     await send_hot(event, ".10min", [
         (group_id, len(filter_stamps(group_stamps, 10*MINUTE)))
         for group_id, group_stamps in stamps.items()
@@ -39,7 +39,7 @@ async def hot_10min_handle(event: MessageEvent) -> None:
 
 
 @hot.command("hour").handle()
-async def hot_hour_handle(event: MessageEvent) -> None:
+async def hot_hour_handler(event: MessageEvent) -> None:
     await send_hot(event, ".hour", [
         (group_id, len(filter_stamps(group_stamps, HOUR)))
         for group_id, group_stamps in stamps.items()
@@ -47,12 +47,12 @@ async def hot_hour_handle(event: MessageEvent) -> None:
 
 
 @hot.command("day").handle()
-async def hot_day_handle(event: MessageEvent) -> None:
+async def hot_day_handler(event: MessageEvent) -> None:
     await send_hot(event, ".day", day.items())
 
 
 @hot.command("total").handle()
-async def hot_total_handle(event: MessageEvent) -> None:
+async def hot_total_handler(event: MessageEvent) -> None:
     await send_hot(event, ".total", total.items())
 
 

@@ -20,7 +20,7 @@ if not (emojis := JsonDict("github.emojis.json", str)):
 
 
 @on_command("github", aliases={"gh"}).handle()
-async def github_handle(
+async def github_handler(
     matcher: Matcher,
     event: MessageEvent,
     arg: Message = CommandArg()

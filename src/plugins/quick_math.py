@@ -29,7 +29,7 @@ EXPIRE_TIME = timedelta(seconds=10)
 
 
 @on_command("quick-math", aliases={"qm"}).handle()
-async def quick_math_handle(
+async def quick_math_handler(
     event: MessageEvent,
     arg: Message = CommandArg()
 ) -> None:
@@ -58,7 +58,7 @@ async def quick_math_handle(
                 temp=True,
                 expire_time=EXPIRE_TIME
             ).handle()
-            async def quick_math_answer_handle(
+            async def quick_math_answer_handler(
                 matcher: Matcher,
                 succ_event: MessageEvent
             ) -> None:
@@ -70,7 +70,7 @@ async def quick_math_handle(
                 ), at_sender=True)
                 if (get_session_id(succ_event)
                         not in disableds[succ_event.message_type]):
-                    await quick_math_handle(succ_event, "")
+                    await quick_math_handler(succ_event, "")
 
             await asyncio.sleep(EXPIRE_TIME.total_seconds())
             await delete_msg(message_id)

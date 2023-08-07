@@ -13,7 +13,7 @@ lang = CommandGroup("lang")
 
 
 @lang.command(tuple()).handle()
-async def lang_set_handle(
+async def lang_set_handler(
     matcher: Matcher,
     event: MessageEvent,
     arg: Message = CommandArg()
@@ -25,10 +25,10 @@ async def lang_set_handle(
 
 
 @lang.command("list").handle()
-async def lang_list_handle(matcher: Matcher, event: MessageEvent) -> None:
+async def lang_list_handler(matcher: Matcher, event: MessageEvent) -> None:
     await matcher.send(text(event, ".list", langs=langs))
 
 
 @lang.command("add").handle()
-async def lang_add_handle(matcher: Matcher, event: MessageEvent) -> None:
+async def lang_add_handler(matcher: Matcher, event: MessageEvent) -> None:
     await matcher.send(text(event, ".add"))

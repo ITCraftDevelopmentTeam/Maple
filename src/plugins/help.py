@@ -9,7 +9,7 @@ from ._lang import parse, text
 
 
 @on_command("help").handle()
-async def help_handle(
+async def help_handler(
     matcher: Matcher,
     event: MessageEvent,
     arg: Message = CommandArg()

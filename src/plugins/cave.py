@@ -25,7 +25,7 @@ branchs = JsonDict("cave.branchs.json", lambda: "session")
 
 
 @cave.command(tuple()).handle()
-async def cave_handle(matcher: Matcher, event: MessageEvent) -> None:
+async def cave_handler(matcher: Matcher, event: MessageEvent) -> None:
     branch_name, branch = get_branch(event)
     _text = partial(text, branch=branch_name)
     if not branch:
@@ -34,7 +34,7 @@ async def cave_handle(matcher: Matcher, event: MessageEvent) -> None:
 
 
 @cave.command("add").handle()
-async def cave_add_handle(
+async def cave_add_handler(
     matcher: Matcher,
     event: MessageEvent,
     arg: Message = CommandArg()
@@ -57,7 +57,7 @@ async def cave_add_handle(
 
 
 @cave.command("get").handle()
-async def cave_get_handle(
+async def cave_get_handler(
     matcher: Matcher,
     event: MessageEvent,
     arg: Message = CommandArg()
@@ -94,7 +94,7 @@ async def cave_get_handle(
 
 
 @cave.command("comment", aliases={"cmt"}).handle()
-async def cave_comment_handle(
+async def cave_comment_handler(
     matcher: Matcher,
     event: MessageEvent,
     arg: Message = CommandArg()
@@ -120,7 +120,7 @@ async def cave_comment_handle(
 
 
 @cave.command("remove", aliases={"rm"}).handle()
-async def cave_remove_handle(
+async def cave_remove_handler(
     matcher: Matcher,
     event: MessageEvent,
     arg: Message = CommandArg()
@@ -165,7 +165,7 @@ async def cave_remove_handle(
 
 
 @cave.command("checkout").handle()
-async def cave_checkout_handle(
+async def cave_checkout_handler(
     matcher: Matcher,
     event: MessageEvent,
     arg: Message = CommandArg()

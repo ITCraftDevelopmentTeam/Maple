@@ -9,5 +9,5 @@ from nonebot.adapters.onebot.v11 import Message, unescape
 from .github import unescape_emoji
 
 @on_command("echo", permission=SUPERUSER).handle()
-async def echo_handle(matcher: Matcher, arg: Message = CommandArg()) -> None:
+async def echo_handler(matcher: Matcher, arg: Message = CommandArg()) -> None:
     await matcher.send(unescape_emoji(unescape(str(arg))))
