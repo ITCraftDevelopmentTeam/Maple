@@ -31,30 +31,24 @@ def get_lang(lang: LangType) -> LangTag:
 
 def parse(__string: str, __lang: LangType, /, **kwargs: Any) -> str:
     string, lang = __string.strip(), get_lang(__lang)
-    # `text`
+    # `text()`
     string = re.sub(
-        pattern=r"{{%.*?%}}",
-        repl=lambda macth: "{{ text('" + macth.group()[3:-3].strip() + "') }}",
-        string=string,
-        flags=re.DOTALL
+        pattern=r"{{%.*?%}}", string=string,
+        repl=lambda macth: "{{ text(f'" + macth.group()[3:-3].strip() + "') }}"
     )
     # list comprehension
     string = re.sub(
-        pattern=r"{{\$.*?\$}}",
-        repl=lambda macth: "{{ '\\n'.join([" + macth.group()[3:-3] + "]) }}",
-        string=string,
-        flags=re.DOTALL
+        pattern=r"{{\$.*?\$}}", string=string, flags=re.DOTALL,
+        repl=lambda macth: "{{ '\\n'.join([" + macth.group()[3:-3] + "]) }}"
     )
     # embedded Python code
     string = re.sub(
-        pattern=r"{{.*?}}",
+        pattern=r"{{.*?}}", string=string, flags=re.DOTALL,
         repl=lambda macth: str(eval(macth.group()[2:-2].strip(), {
             "__lang__": lang,
             "text": partial(text, lang, **kwargs),
             **kwargs
-        })),
-        string=string,
-        flags=re.DOTALL
+        }))
     )
     return string.replace("\{", "{").replace("\}", "}")
 

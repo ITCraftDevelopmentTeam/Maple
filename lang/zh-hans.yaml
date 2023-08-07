@@ -79,10 +79,12 @@ hot:
     {{% hot.rank %}}
 
 cave:
-  empty: "回声洞里空空如也呢，快去投稿吧！"
+  empty: "{{% cave.branch.desc %}} 里空空如也呢，快去投稿吧！"
   checkout: "已成功切换到 分支#{{ branch }}！"
+  branch:
+    desc: "§{{ branch }}"
   cave:
-    desc: "回声洞#{{ cave_id }}"
+    desc: "{{% cave.branch.desc %}}#{{ cave_id }}"
     text:
       "": |-
         {{% cave.cave.desc %}}：
@@ -139,3 +141,15 @@ github:
     标签：{{ "".join(map(lambda x: f"【{x['name']}】", data["labels"])) or None }}
     受让人：{{ " ".join(map(lambda x: f"@{x['login']}", data["assignees"])) or None }}
     {{ data["body"] }}
+  commit: |-
+    提交：{{ data["commit"]["message"] }}
+    修改行数：{{ data["stats"]["total"] }} 新增行数：{{ data["stats"]["additions"] }} 移除行数：{{ data["stats"]["deletions"] }}
+    {{$
+      {
+        "modified": f"修改：{file['filename']} 新增行数：{file['additions']} 移除行数：{file['deletions']}",
+        "added": f"新增：{file['filename']} 新增行数：{file['additions']}",
+        "removed": f"移除：{file['filename']} 移除行数：{file['deletions']}",
+        "renamed": f"移动：{file.get('previous_filename')} → {file['filename']}"
+      }[file["status"]]
+      for file in data["files"]
+    $}}

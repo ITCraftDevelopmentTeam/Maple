@@ -26,8 +26,10 @@ branchs = JsonDict("cave.branchs.json", lambda: "session")
 
 @cave.command(tuple()).handle()
 async def cave_handle(matcher: Matcher, event: MessageEvent) -> None:
-    if not (branch := get_branch(event)):
-        await matcher.finish(text(event, ".empty"))
+    branch_name, branch = get_branch(event)
+    _text = partial(text, branch=branch_name)
+    if not branch:
+        await matcher.finish(_text(event, ".empty"))
     await send_cave(choice(list(branch.keys())), event)
 
 
@@ -37,7 +39,8 @@ async def cave_add_handle(
     event: MessageEvent,
     arg: Message = CommandArg()
 ) -> None:
-    branch = get_branch(event)
+    branch_name, branch = get_branch(event)
+    _text = partial(text, branch=branch_name)
     if founds := re.findall(REPLY_PATTERN, event.raw_message):
         data = await get_msg(founds[0])
         content = data["message"]
@@ -50,7 +53,7 @@ async def cave_add_handle(
         cave_id += 1
     cave_id = str(cave_id)
     branch[cave_id] = {"content": content, "user_id": user_id}
-    await matcher.send(text(event, ".cave.add", cave_id=cave_id))
+    await matcher.send(_text(event, ".cave.add", cave_id=cave_id))
 
 
 @cave.command("get").handle()
@@ -59,13 +62,15 @@ async def cave_get_handle(
     event: MessageEvent,
     arg: Message = CommandArg()
 ) -> None:
-    if not (branch := get_branch(event)):
-        await matcher.finish(text(event, ".empty"))
+    branch_name, branch = get_branch(event)
+    _text = partial(text, branch=branch_name)
+    if not branch:
+        await matcher.finish(_text(event, ".empty"))
     cave_id = str(arg).strip()
     if "-" in cave_id and str(event.user_id) in get_bot().config.superusers:
         start, end, *_ = cave_id.split("-")
         if not (start.isdecimal() and end.isdecimal()):
-            await matcher.finish(text(event, ".cave.non-exist", cave_id))
+            await matcher.finish(_text(event, ".cave.non-exist", cave_id))
         await send(event, [
             await custom_forward_node(
                 user_id=(user_id := branch[cave_id]["user_id"]),
@@ -95,8 +100,10 @@ async def cave_comment_handle(
     arg: Message = CommandArg()
 ) -> None:
     cave_id, content = str(arg).strip().split(maxsplit=1)
-    if cave_id not in (branch := get_branch(event)).keys():
-        await matcher.finish(text(event, ".cave.non-exist", cave_id=cave_id))
+    branch_name, branch = get_branch(event)
+    _text = partial(text, branch=branch_name)
+    if cave_id not in branch.keys():
+        await matcher.finish(_text(event, ".cave.non-exist", cave_id=cave_id))
     if "comments" not in branch[cave_id].keys():
         branch[cave_id]["comments"] = {}
     comment_id = len(branch[cave_id]["comments"])
@@ -105,7 +112,7 @@ async def cave_comment_handle(
         "content": content,
         "time": event.time
     }
-    await matcher.send(text(
+    await matcher.send(_text(
         event, ".comment.add",
         cave_id=cave_id,
         comment_id=comment_id
@@ -121,12 +128,14 @@ async def cave_remove_handle(
     comment_id = ""
     if " " in (cave_id := str(arg).strip()):
         cave_id, comment_id, *_ = cave_id.split()
-    if cave_id not in (branch := get_branch(event)).keys():
-        await matcher.finish(text(event, ".cave.non-exist", cave_id=cave_id))
+    branch_name, branch = get_branch(event)
+    _text = partial(text, branch=branch_name)
+    if cave_id not in branch.keys():
+        await matcher.finish(_text(event, ".cave.non-exist", cave_id=cave_id))
     if comment_id != "":    # remove comment
         comments = branch[cave_id].get("comments", {})
         if comment_id not in comments.keys():
-            await matcher.finish(text(
+            await matcher.finish(_text(
                 event, ".comment.non-exist",
                 cave_id=cave_id,
                 comment_id=comment_id
@@ -134,12 +143,12 @@ async def cave_remove_handle(
         if (str(event.user_id) in get_bot().config.superusers
                 or event.user_id == comments[comment_id]["user_id"]):
             branch.pop(cave_id)
-            await matcher.finish(text(
+            await matcher.finish(_text(
                 event, ".comment.remove",
                 cave_id=cave_id,
                 comment_id=comment_id
             ))
-        await matcher.send(text(
+        await matcher.send(_text(
             event, ".comment.remove.no-permission",
             cave_id=cave_id,
             comment_id=comment_id
@@ -148,8 +157,8 @@ async def cave_remove_handle(
         if (str(event.user_id) in get_bot().config.superusers
                 or event.user_id == branch[cave_id]["user_id"]):
             branch.pop(cave_id)
-            await matcher.finish(text(event, ".cave.remove", cave_id=cave_id))
-        await matcher.send(text(
+            await matcher.finish(_text(event, ".cave.remove", cave_id=cave_id))
+        await matcher.send(_text(
             event, ".cave.remove.no-permission",
             cave_id=cave_id
         ))
@@ -171,23 +180,24 @@ async def get_cave(
 ) -> list[Message | list[ForwardNode]]:
     group_id = getattr(event, "group_id", None)
     messages = []
-    if not (branch := get_branch(event)):
-        return [text(event, ".cave.empty")]
+    branch_name, branch = get_branch(event)
+    _text = partial(text, branch=branch_name)
+    if not branch:
+        return [_text(event, ".cave.empty")]
     if cave_id not in branch.keys():
-        return [text(event, ".cave.non-exist", cave_id=cave_id)]
-
+        return [_text(event, ".cave.non-exist", cave_id=cave_id)]
     message = branch[cave_id]
     user_id = message["user_id"]
     content = message["content"]
     sender = escape(await get_user_name(user_id, group_id))
     if re.search(SPECIAL_PATTERN, content):
-        messages.extend([Message(text(
+        messages.extend([Message(_text(
             event, ".cave.text.without-content",
             cave_id=cave_id,
             sender=sender
         )), Message(content)])
     else:
-        messages.append(Message(text(
+        messages.append(Message(_text(
             event, ".cave.text",
             cave_id=cave_id,
             content=content,
@@ -199,7 +209,7 @@ async def get_cave(
                 comment["content"],
                 user_id := comment["user_id"],
                 group_id=group_id,
-                name=text(
+                name=_text(
                     event, ".comment.text",
                     sender=await get_user_name(user_id),
                     comment_id=comment_id
@@ -215,8 +225,8 @@ async def send_cave(cave_id: str, event: MessageEvent) -> None:
         await send(event, message)
 
 
-def get_branch(event: MessageEvent) -> JsonDict[str, dict]:
-    branch = branchs[str(event.user_id)]
+def get_branch(event: MessageEvent) -> tuple[str, JsonDict[str, dict]]:
+    branch_name = branch = branchs[str(event.user_id)]
     if branch == "session":
         branch = Path(event.message_type, str(get_session_id(event)))
-    return JsonDict(Path("caves", f"{branch}.json"), dict)
+    return branch_name, JsonDict(Path("caves", f"{branch}.json"), dict)
