@@ -56,10 +56,10 @@ def unescape_emoji(string: str, *, as_image: bool = False) -> str:
     def repl(match: re.Match[str]) -> str:
         emoji_id = match.group()[1:-1]
         if as_image:
-            return MessageSegment.image(emojis[emoji_id])
+            return str(MessageSegment.image(emojis[emoji_id]))
         return "".join(map(
             lambda x: chr(int(x, base=16)),
             emojis[emoji_id][59:-7].split("-")
         )) if emoji_id in emojis.keys() else match.group()
 
-    return re.sub(pattern=r":.*?:", string=string, repl=repl)
+    return re.sub(pattern=r":[a-zA-Z0-9_]+?:", string=string, repl=repl)

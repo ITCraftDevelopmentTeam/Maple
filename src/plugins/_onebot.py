@@ -210,18 +210,27 @@ async def get_user_name(
 ) -> str:
     if group_id is not None:
         try:
-            info = await get_group_member_info(group_id, user_id, no_cache)
-            return info["card"] or info["nickname"]
+            data = await get_group_member_info(group_id, user_id, no_cache)
+            return data["card"] or data["nickname"]
         except ActionFailed:
             pass
     return (await get_stranger_info(int(user_id), no_cache))["nickname"]
 
 
-async def get_group_name(group_id: GroupID) -> str:
+async def get_group_name(
+    group_id: GroupID,
+    no_cache: bool = False,
+    mask_len: int = 3
+) -> str:
     try:
-        return (await get_group_info(group_id))["group_name"]
+        return (await get_group_info(group_id, no_cache))["group_name"]
     except ActionFailed:
-        return str(group_id)
+        group_id = str(group_id)
+        return "".join([
+            group_id[:mask_len],
+            (len(group_id) - mask_len*2) * "*",
+            group_id[-mask_len:]
+        ])
 
 
 async def get_msg(
@@ -231,8 +240,6 @@ async def get_msg(
 
 
 async def get_target_ids(raw_message: str) -> set[str]:
-    if hasattr(raw_message, "raw_message"):
-        raw_message = raw_message.raw_message
     target_ids = set(re.findall(AT_PATTERN, raw_message))
     if (match := re.match(REPLY_PATTERN, raw_message)):
         target_ids.add(str((await get_msg(match.group()[13:-1]))
