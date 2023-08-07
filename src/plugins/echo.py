@@ -30,6 +30,6 @@ async def echo_handler(
 
 def unescape_unicode(string: str) -> str:
     return re.sub(
-        pattern=r"u+[0-9a-fA-F]", string=string,
+        pattern=r"u+[0-9a-f]", string=string.lower(),
         repl=lambda match: chr(int(match.group()[2:], base=16))
     )
