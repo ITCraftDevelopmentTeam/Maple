@@ -38,8 +38,11 @@ class JsonDict(dict, Generic[KT, VT]):
 
     def __setitem__(self, __key: Any, __value: Any) -> None:
         super().__setitem__(__key, __value)
-        dump_json(self, self.path)
+        self.save()
 
-    def __delitem__(self, __key: Any) -> None:
-        super().__delitem__(__key)
+    def update(self, *args: Any, **kwargs: VT) -> None:
+        super().update(*args, **kwargs)
+        self.save()
+
+    def save(self) -> None:
         dump_json(self, self.path)
