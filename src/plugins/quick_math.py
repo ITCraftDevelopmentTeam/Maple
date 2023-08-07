@@ -63,11 +63,10 @@ async def quick_math_handle(
                 succ_event: MessageEvent
             ) -> None:
                 credit = randint(1, 3)
-                user_id = str(succ_event.user_id)
-                credits[user_id] += credit
+                credits[str(succ_event.user_id)] += credit
                 await matcher.send(text(
-                    user_id, ".correct",
-                    got=credit, total=credits[user_id]
+                    str(succ_event.user_id), ".correct",
+                    got=credit, total=credits[str(succ_event.user_id)]
                 ), at_sender=True)
                 if (get_session_id(succ_event)
                         not in disableds[succ_event.message_type]):
