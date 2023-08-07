@@ -13,7 +13,7 @@ from ._store import JsonDict
 
 lang_use = JsonDict("lang.use.json", lambda: "zh-hans")
 langs = {}
-for path in Path("lang").glob("[!_]*"):
+for path in Path("langs").glob("[!_]*"):
     with open(path, "r", encoding="utf-8") as file:
         langs[path.stem] = yaml.safe_load(file)
 LangTag = eval("Literal['" + "','".join(langs.keys()) + "']")
