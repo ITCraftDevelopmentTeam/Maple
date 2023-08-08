@@ -1,4 +1,6 @@
 import re
+from re import DOTALL as DA
+import traceback
 from functools import partial
 from pathlib import Path
 from typing import Optional, Any, Literal   # this `Literal` is for `eval`
@@ -32,26 +34,26 @@ def get_lang(lang: LangType) -> LangTag:
 def parse(__string: str, __lang: LangType, /, **kwargs: Any) -> str:
     string, lang = __string.strip(), get_lang(__lang)
     # comment
-    string = re.sub(pattern=r"{{#.*?#}}", string=string, repl="")
+    string = re.sub(r"{{#.*?#}}", string=string, flags=DA, repl="")
     # `text()`
-    string = re.sub(
-        pattern=r"{{%.*?%}}", string=string,
-        repl=lambda macth: "{{ text(f'" + macth.group()[3:-3].strip() + "') }}"
-    )
+    string = re.sub(r"{{%.*?%}}", string=string, flags=DA, repl=lambda match:
+                    "{{ text(f'" + match.group()[3:-3].strip() + "') }}")
     # list comprehension
-    string = re.sub(
-        pattern=r"{{\$.*?\$}}", string=string, flags=re.DOTALL,
-        repl=lambda macth: "{{ '\\n'.join([" + macth.group()[3:-3] + "]) }}"
-    )
+    string = re.sub(r"{{\$.*?\$}}", string=string, flags=DA, repl=lambda match:
+                    "{{ '\\n'.join([" + match.group()[3:-3] + "]) }}")
+
+    def repl(match: re.Match[str]) -> str:
+        try:
+            return str(eval(match.group()[2:-2].strip(), {
+                "__lang__": lang,
+                "text": partial(text, lang, **kwargs),
+                **kwargs
+            }))
+        except Exception:
+            return traceback.format_exc()
+
     # embedded Python code
-    string = re.sub(
-        pattern=r"{{.*?}}", string=string, flags=re.DOTALL,
-        repl=lambda macth: str(eval(macth.group()[2:-2].strip(), {
-            "__lang__": lang,
-            "text": partial(text, lang, **kwargs),
-            **kwargs
-        }))
-    )
+    string = re.sub(r"{{.*?}}", repl=repl, string=string, flags=DA)
     return string.replace("\{", "{").replace("\}", "}")
 
 
