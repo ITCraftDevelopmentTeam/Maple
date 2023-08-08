@@ -32,9 +32,6 @@ async def cave_handler(
 ) -> None:
     print(str(arg).strip())
     branch_name, branch = get_branch(event, str(arg).strip())
-    await matcher.send(f"{arg=}")
-    await matcher.send(f"{branch_name=}")
-    await matcher.send(f"{branch=}")
     _text = partial(text, branch=branch_name)
     if not branch:
         await matcher.finish(_text(event, ".empty"))
