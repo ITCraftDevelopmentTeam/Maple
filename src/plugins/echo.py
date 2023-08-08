@@ -21,6 +21,7 @@ async def echo_handler(
     arg = unescape_ascii(arg)
     arg = unescape_unicode(arg)
     arg = arg.replace(":fr:", ":white_flag:")
+    arg = unescape_emoji(arg)
     await matcher.send(Message(arg))
 
 

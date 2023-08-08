@@ -62,6 +62,7 @@ def unescape_emoji(string: str, *, as_image: bool = False) -> str:
         return "\u200d".join(map(
             lambda x: chr(int(x, base=16)),
             emojis[emoji_id][59:-7].split("-")
+            # .../images/icons/emoji/unicode/{unicode(s)}.png?v8
         ))
 
     return re.sub(r":([a-zA-Z0-9_]+?):", string=string, repl=repl)
