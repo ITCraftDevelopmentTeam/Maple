@@ -13,7 +13,7 @@ help:
     $}}
   lang: |-
     lang —— 语言
-    #lang [语言]：设置语言
+    #lang <语言>：设置语言
     #lang.list：列出当前可用语言
     #lang.add：贡献语言
   hot: |-
@@ -22,23 +22,31 @@ help:
     #hot.hour：显示近一小时群聊热度排行
     #hot.day：显示今日群聊热度排行
     #hot.total：显示总群聊热度排行
+    {{$
+      f"#help.{command}：显示 {name} 群聊热度排行"
+      for command, name in {
+        "": "近十分钟",
+        "hot": "近一小时",
+        "cave": "今日",
+        "quick-math": "总"
+      }.items()
+    $}}
   cave: |-
     cave —— 回声洞
-    #cave：随机读取一条 cave
-    #cave.add [内容]：添加一条 cave
-    [回复] #cave.add：将回复的消息添加到 cave
-    #cave.comment [cave id] [内容]：评论一条 cave
-    #cave.remove [cave id]：删除一条 cave
-    #cave.remove [cave id] [comment id]：删除一条 评论
-    #cave.checkout [branch]：切换分支
+    #cave [<branch>]：随机读取一条 cave
+    #cave.add <内容>：添加一条 cave
+    [回复] #cave.add [<branch>]：将回复的消息添加到 cave
+    #cave.comment <cave id> <内容>：评论一条 cave
+    #cave.remove <cave id> [<comment id>]：删除一条 cave 或 评论
+    #cave.checkout <branch>：切换分支
   quick-math: |-
     quick-math —— 速算
     #quick-math：开启速算
-    #quick-math [on|off]：[开启|关闭]连续速算
+    #quick-math (on|off)：[开启|关闭]连续速算
   github: |-
     github —— GitHub 查询
     {{$
-      f"#github [{command}]：查询有关 GitHub {name} 的信息"
+      f"#github <{command}>：查询有关 GitHub {name} 的信息"
       for command, name in {
         "repo": "仓库",
         "issue": "议题",

@@ -2,7 +2,7 @@ import re
 from functools import partial
 from random import choice
 from pathlib import Path
-from typing import cast
+from typing import Optional, cast
 
 from nonebot import get_bot
 from nonebot import CommandGroup
@@ -25,8 +25,16 @@ branchs = JsonDict("cave.branchs.json", lambda: "session")
 
 
 @cave.command(tuple()).handle()
-async def cave_handler(matcher: Matcher, event: MessageEvent) -> None:
-    branch_name, branch = get_branch(event)
+async def cave_handler(
+    matcher: Matcher,
+    event: MessageEvent,
+    arg: Message = CommandArg()
+) -> None:
+    print(str(arg).strip())
+    branch_name, branch = get_branch(event, str(arg).strip())
+    await matcher.send(f"{arg=}")
+    await matcher.send(f"{branch_name=}")
+    await matcher.send(f"{branch=}")
     _text = partial(text, branch=branch_name)
     if not branch:
         await matcher.finish(_text(event, ".empty"))
@@ -39,15 +47,17 @@ async def cave_add_handler(
     event: MessageEvent,
     arg: Message = CommandArg()
 ) -> None:
-    branch_name, branch = get_branch(event)
-    _text = partial(text, branch=branch_name)
+    branch = ""
     if founds := re.findall(REPLY_PATTERN, event.raw_message):
         data = await get_msg(founds[0])
         content = data["message"]
         user_id = data["sender"]["user_id"]
+        branch = str(arg).strip()
     else:
         content = str(arg).strip()
         user_id = event.user_id
+    branch_name, branch = get_branch(event, branch)
+    _text = partial(text, branch=branch_name)
     cave_id = 0
     while str(cave_id) in branch.keys():
         cave_id += 1
@@ -183,7 +193,7 @@ async def get_cave(
     branch_name, branch = get_branch(event)
     _text = partial(text, branch=branch_name)
     if not branch:
-        return [_text(event, ".cave.empty")]
+        return [_text(event, ".empty")]
     if cave_id not in branch.keys():
         return [_text(event, ".cave.non-exist", cave_id=cave_id)]
     message = branch[cave_id]
@@ -225,8 +235,11 @@ async def send_cave(cave_id: str, event: MessageEvent) -> None:
         await send(event, message)
 
 
-def get_branch(event: MessageEvent) -> tuple[str, JsonDict[str, dict]]:
-    branch_name = branch = branchs[str(event.user_id)]
+def get_branch(
+    event: MessageEvent,
+    branch: str = ""
+) -> tuple[str, JsonDict[str, dict]]:
+    branch_name = branch = branch or branchs[str(event.user_id)]
     if branch == "session":
         branch = Path(event.message_type, str(get_session_id(event)))
     return branch_name, JsonDict(Path("caves", f"{branch}.json"), dict)
