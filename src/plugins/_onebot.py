@@ -242,6 +242,6 @@ async def get_msg(
 async def get_target_ids(raw_message: str) -> set[str]:
     target_ids = set(re.findall(AT_PATTERN, raw_message))
     if (match := re.match(REPLY_PATTERN, raw_message)):
-        target_ids.add(str((await get_msg(match.group()[13:-1]))
+        target_ids.add(str((await get_msg(match.group(1)))
                            ["sender"]["user_id"]))
     return {"all"} if "all" in target_ids else target_ids

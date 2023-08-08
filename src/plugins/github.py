@@ -54,7 +54,7 @@ async def github_handler(
 
 def unescape_emoji(string: str, *, as_image: bool = False) -> str:
     def repl(match: re.Match[str]) -> str:
-        emoji_id = match.group()[1:-1]
+        emoji_id = match.group(1)
         if emoji_id not in emojis.keys():
             return match.group()
         if as_image:
@@ -64,4 +64,4 @@ def unescape_emoji(string: str, *, as_image: bool = False) -> str:
             emojis[emoji_id][59:-7].split("-")
         ))
 
-    return re.sub(r":[a-zA-Z0-9_]+?:", string=string, repl=repl)
+    return re.sub(r":([a-zA-Z0-9_]+?):", string=string, repl=repl)

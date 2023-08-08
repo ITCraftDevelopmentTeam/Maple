@@ -16,13 +16,19 @@ async def echo_handler(
     event: MessageEvent,
     arg: Message = CommandArg()
 ) -> None:
-    arg = unescape(str(arg))
+    arg: str = unescape(str(arg))
     arg = parse(arg, event)
+    arg = unescape_ascii(arg)
     arg = unescape_unicode(arg)
-    arg = unescape_emoji(arg)
+    arg = arg.replace(":fr:", ":white_flag:")
     await matcher.send(Message(arg))
 
 
+def unescape_ascii(string: str) -> str:
+    return re.sub(r"&#(\d+);", string=string, flags=re.IGNORECASE,
+                  repl=lambda match: chr(int(match.group(1))))
+
+
 def unescape_unicode(string: str) -> str:
-    return re.sub(r"u\+[0-9a-f]+", string=string, flags=re.IGNORECASE,
-                  repl=lambda match: chr(int(match.group()[2:], base=16)))
+    return re.sub(r"\\u([0-9a-f]+)", string=string, flags=re.IGNORECASE,
+                  repl=lambda match: chr(int(match.group(1), base=16)))

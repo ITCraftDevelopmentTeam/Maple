@@ -1,5 +1,4 @@
 import re
-from re import DOTALL as DA
 import traceback
 from functools import partial
 from pathlib import Path
@@ -34,17 +33,17 @@ def get_lang(lang: LangType) -> LangTag:
 def parse(__string: str, __lang: LangType, /, **kwargs: Any) -> str:
     string, lang = __string.strip(), get_lang(__lang)
     # comment
-    string = re.sub(r"{{#.*?#}}", string=string, flags=DA, repl="")
+    string = re.sub(r"{{#(.*?)#}}", string=string, flags=re.DOTALL, repl="")
     # `text()`
-    string = re.sub(r"{{%.*?%}}", string=string, flags=DA, repl=lambda match:
-                    "{{ text(f'" + match.group()[3:-3].strip() + "') }}")
+    string = re.sub(r"{{%(.*?)%}}", string=string, flags=re.DOTALL,
+                    repl=lambda m: "{{text(f'" + m.group(1).strip() + "')}}")
     # list comprehension
-    string = re.sub(r"{{\$.*?\$}}", string=string, flags=DA, repl=lambda match:
-                    "{{ '\\n'.join([" + match.group()[3:-3] + "]) }}")
+    string = re.sub(r"{{\$(.*?)\$}}", string=string, flags=re.DOTALL,
+                    repl=lambda m: "{{'\\n'.join([" + m.group(1) + "])}}")
 
     def repl(match: re.Match[str]) -> str:
         try:
-            return str(eval(match.group()[2:-2].strip(), {
+            return str(eval(match.group(1).strip(), {
                 "__lang__": lang,
                 "text": partial(text, lang, **kwargs),
                 **kwargs
@@ -53,7 +52,7 @@ def parse(__string: str, __lang: LangType, /, **kwargs: Any) -> str:
             return traceback.format_exc()
 
     # embedded Python code
-    string = re.sub(r"{{.*?}}", repl=repl, string=string, flags=DA)
+    string = re.sub(r"{{(.*?)}}", repl=repl, string=string, flags=re.DOTALL)
     return string.replace("\{", "{").replace("\}", "}")
 
 
