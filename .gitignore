@@ -1,7 +1,9 @@
-.venv
-data
-go-cqhttp
-qsign
-__pycache__
+/.venv/
+/data/
+/go-cqhttp/
+/qsign/
+__pycache__/
 **/!*
 **/_!*
+/.env
+/.env.*
