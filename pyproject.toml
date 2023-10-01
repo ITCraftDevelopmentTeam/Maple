@@ -10,5 +10,5 @@ adapters = [
     { name = "OneBot V11", module_name = "nonebot.adapters.onebot.v11" }
 ]
 plugins = ["nonebot_plugin_apscheduler"]
-plugin_dirs = ["maple"]
+plugin_dirs = ["src/plugins"]
 builtin_plugins = []

@@ -71,7 +71,7 @@ hot:
   rank: |-
     {{$
       (">" if group_id == event.group_id else "-") + f" {index + 1}. {group_name}：{count}"
-      for index, (group_name, count, group_id) in enumerate(ranks[:11])
+      for index, (group_id, group_name, count) in enumerate(ranks[:11])
     $}}
   10min: |-
     近十分钟群聊热度排行：
@@ -121,6 +121,7 @@ quick-math:
     回答正确！
     恭喜你获得了{{ got }}点 credit！
     你当前拥有{{ total }}点 credit！
+  probably: 0.05
   eggs:
     0 / 0 = ?: "[nN]a[nN]|ZeroDivisionError"
     creeper?: "[aA][wW]+.*?[mM][aA][N].*?"

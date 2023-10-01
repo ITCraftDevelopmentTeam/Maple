@@ -5,15 +5,15 @@ from nonebot.matcher import Matcher
 from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11 import Message, MessageEvent
 
-from ._lang import parse, text
+from ._lang import parse, raw
 
 
-@on_command("help").handle()
+@on_command('help').handle()
 async def help_handler(
     matcher: Matcher,
     event: MessageEvent,
     arg: Message = CommandArg()
 ) -> None:
-    helps = cast(dict, text(event, "help", escape_blank_key=False))
+    helps = cast(dict, raw('help'))
     if (key := str(arg)) in helps.keys():
         await matcher.send(parse(helps[key], event))
