@@ -1,7 +1,10 @@
 from time import time
 
-from nonebot import on_message, CommandGroup
+from nonebot import require, on_message, CommandGroup
 from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
+
+require("nonebot_plugin_apscheduler")
+
 from nonebot_plugin_apscheduler import scheduler
 
 from ._gocq import send_by, groupname, GroupId
