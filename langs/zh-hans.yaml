@@ -132,8 +132,8 @@ quick-math:
     "off": "已关闭连续速算"
 
 github:
-  non-exist: "GitHub/{{ arg }} 不存在呢。。。"
-  nonsupport: "暂时还不支持 {{ arg }} 呢。。。"
+  non-exist: "GitHub/{{ path }} 不存在呢。。。"
+  nonsupport: "暂时还不支持 {{ path }} 呢。。。"
   repo: |-
     仓库：{{ data["full_name"] }}
     协议：{{ (data["license"] or {"name": None})["name"] }}

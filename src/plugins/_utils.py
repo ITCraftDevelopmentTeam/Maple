@@ -36,6 +36,6 @@ def unescape_ascii(string: str) -> str:
 
 def unescape_unicode(string: str) -> str:
     return re.sub(
-        r'\\u([0-9a-f]+)', string=string, flags=re.IGNORECASE,
+        r'\\[uU]([0-9a-f]+)', string=string, flags=re.IGNORECASE,
         repl=lambda match: chr(int(match.group(1), base=16))
     )

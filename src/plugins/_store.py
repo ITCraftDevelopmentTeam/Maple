@@ -6,7 +6,7 @@ from ._sorcery import modulename
 
 
 BASE_PATH = Path('data')
-_VT = TypeVar('_VT')
+_T = TypeVar('_T')
 
 
 def _load(path: Path, default: Any = None) -> Any:
@@ -24,13 +24,13 @@ def _dump(obj: Any, path: Path) -> None:
         json.dump(obj, file, ensure_ascii=False, indent=2, sort_keys=True)
 
 
-class Json(Generic[_VT]):
+class Json(Generic[_T]):
     def __init__(
         self,
         filepath: Path | str,
-        schema: type[_VT],
+        schema: type[_T],
         /, *args: Any,
-        default: Optional[Callable[[], _VT] | _VT] = None,
+        default: Optional[Callable[[], _T] | _T] = None,
         **kwargs: Any,
     ) -> None:
         filepath = Path(filepath)
@@ -41,13 +41,13 @@ class Json(Generic[_VT]):
             stem = stem + '.json'
         self.path = BASE_PATH / filepath.parent / stem
         self.schema = schema
-        self.factory = cast(Callable[[], _VT], (
+        self.factory = cast(Callable[[], _T], (
             default if callable(default)
-            else lambda: cast(_VT, default)
+            else lambda: cast(_T, default)
         ) if default is not None else schema)
         self.args, self.kwargs = args, kwargs
 
-    def __enter__(self) -> _VT:
+    def __enter__(self) -> _T:
         self.data = self._
         return self.data
 

@@ -7,3 +7,5 @@ __pycache__/
 **/_!*
 /.env
 /.env.*
+/.vscode/
+/.idea/

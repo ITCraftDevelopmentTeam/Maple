@@ -1,4 +1,4 @@
-from typing import TypeAlias, Literal, TypedDict
+from typing import TypeAlias, Literal, TypedDict, Optional
 
 
 UserId: TypeAlias = str | int
@@ -78,10 +78,13 @@ class ReferenceForwardData(TypedDict):
     id: MessageId
 
 
-class CustomForwardNodeData(TypedDict, total=False):
+class BaseCustomForwardNodeData(TypedDict):
     name: str
     uin: int
     content: Message | list['ForwardNode']
+
+
+class CustomForwardNodeData(BaseCustomForwardNodeData, total=False):
     seq: Message
     time: int
 
@@ -308,22 +311,4 @@ class Status(TypedDict):
     stat: Statistics
 
 
-def custom_forward_node(
-    name: str,
-    uin: UserId,
-    content: Message | list[ForwardNode],
-    time: int
-) -> ForwardNode:
-    return ForwardNode(
-        type='node',
-        data=CustomForwardNodeData(
-            name=name,
-            uin=int(uin),
-            content=content,
-            time=time
-        )
-    )
-
-
-def reference_forward_node(id: Message) -> ForwardNode:
-    return ForwardNode(type='node', data=ReferenceForwardData(id=id))
+del TypeAlias, Literal, TypedDict, Optional

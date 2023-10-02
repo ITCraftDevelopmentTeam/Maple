@@ -6,18 +6,6 @@ from nonebot.adapters.onebot.v11.event import Event
 from ._gocq import UserId, GroupId
 
 
-def user(user_id: UserId) -> Rule:
-    def wapper(event: Event):
-        return int(user_id) == getattr(event, 'user_id', -1)
-    return Rule(wapper)
-
-
-def group(group_id: GroupId) -> Rule:
-    def wapper(event: Event):
-        return int(group_id) == getattr(event, 'group_id', -1)
-    return Rule(wapper)
-
-
 def session(
     event: Optional[Event] = None,
     *,
@@ -33,3 +21,11 @@ def session(
                 and group_id == getattr(event, 'group_id', None))
 
     return Rule(wapper)
+
+
+def user(user_id: UserId) -> Rule:
+    return session(user_id=user_id)
+
+
+def group(group_id: GroupId) -> Rule:
+    return session(group_id=group_id)

@@ -11,7 +11,7 @@ from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11 import Message, MessageEvent
 
 from ._lang import raw, text
-from ._gocq import send_by, delete_msg, session_id, UserId, GroupId
+from ._gocq import send_by, delete_msg, UserId, GroupId
 from ._rule import session
 from ._store import Json
 
@@ -68,7 +68,7 @@ async def quick_math_handler(
                         '.correct', succ_event,
                         got=credit, total=credits[str(succ_event.user_id)]
                     ), at_sender=True)
-                if (session_id(succ_event)
+                if (getattr(succ_event, 'group_id', event.user_id)
                         not in disableds._[succ_event.message_type]):
                     await quick_math_handler(succ_event, '')
 
@@ -76,13 +76,13 @@ async def quick_math_handler(
             await delete_msg(message_id)
 
         case 'on' | 'off' as switch:
-            event_id = session_id(event)
+            session_id = getattr(event, 'group_id', event.user_id)
             with disableds as _disableds:
                 match switch:
                     case 'on':
-                        if event_id in _disableds[event.message_type]:
-                            _disableds[event.message_type].remove(event_id)
+                        if session_id in _disableds[event.message_type]:
+                            _disableds[event.message_type].remove(session_id)
                     case 'off':
-                        if event_id not in _disableds[event.message_type]:
-                            _disableds[event.message_type].append(event_id)
+                        if session_id not in _disableds[event.message_type]:
+                            _disableds[event.message_type].append(session_id)
             await send_by(event, text(f'.auto.{switch}'))

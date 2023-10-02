@@ -2,7 +2,7 @@ import re
 import traceback
 from collections import defaultdict
 from pathlib import Path
-from typing import cast, Union, Optional, Any, Tuple, Dict, Callable, Literal
+from typing import cast, Optional, Any, Callable, Literal, TypeAlias
 
 import yaml
 
@@ -15,9 +15,9 @@ from ._sorcery import modulename, getframe
 
 # TODO: LangTag = eval('Literal['' + '',''.join(langs.keys()) + '']')
 LangTag = Literal['zh-hans']
-LangType = LangTag | UserId | MessageEvent
-Tree = Dict[str, Union[Any, 'Tree']]
-langs: Dict[LangTag, Tree] = {}
+LangType: TypeAlias = LangTag | UserId | MessageEvent
+Tree: TypeAlias = dict[str, Any | 'Tree']
+langs: dict[LangTag, Tree] = {}
 for path in Path('langs').glob('[!_]*'):
     with open(path, 'r', encoding='utf-8') as file:
         langs[cast(LangTag, path.stem)] = yaml.safe_load(file)
@@ -40,12 +40,13 @@ def parse(__string: str, __lang: LangType, /, **kwargs: Any) -> str:
                     repl=lambda m: "{{text(f'" + m.group(1).strip() + "')}}")
     # list comprehension
     string = re.sub(r'{{\$(.*?)\$}}', string=string, flags=re.DOTALL,
-                    repl=lambda m: "{{'\\n'.join([' + m.group(1) + '])}}")
+                    repl=lambda m: "{{'\\n'.join([" + m.group(1) + "])}}")
 
     def repl(match: re.Match[str]) -> str:
         try:
             return str(eval(match[1].strip(), {
                 '__lang__': lang,
+                'raw': raw,
                 'text': text,
                 **kwargs
             }))
@@ -61,7 +62,7 @@ def _get(
     key: str,
     lang: Optional[LangType] = None,
     depth: int = 0
-) -> Tuple[Tree | str, str, LangTag]:
+) -> tuple[Tree | str, str, LangTag]:
     if lang is None:
         lang = getframe(depth + 1).f_locals['event']
     lang = get_lang(cast(LangType, lang))

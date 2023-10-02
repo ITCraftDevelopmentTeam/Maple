@@ -85,7 +85,6 @@ __all__ = [
     # Utils
     'custom_forward_node',
     'reference_forward_node',
-    'session_id',
     'username',
     'groupname',
     'send_forward_msg',
@@ -111,8 +110,33 @@ SPECIAL_PATTERN = r'\[CQ:(' + '|'.join([
 ]) + r'),.*?\]|\[CQ:image,.*?type=(flash|show).*?\]]'
 
 
-def session_id(event: MessageEvent) -> UserId | GroupId:
-    return getattr(event, 'group_id', event.user_id)
+async def custom_forward_node(
+    content: Message | list[ForwardNode],
+    user_id: UserId,
+    group_id: Optional[GroupId],
+    name: Optional[str] = None,
+    time: Optional[int] = None,
+    no_cache: bool = False
+) -> ForwardNode:
+    if name is None:
+        name = await username(user_id, group_id, no_cache)
+    return ForwardNode(
+        type='node',
+        data=CustomForwardNodeData(
+            content=content,
+            uin=int(user_id),
+            name=name
+        ) if time is None else CustomForwardNodeData(
+            content=content,
+            uin=int(user_id),
+            name=name,
+            time=time
+        )
+    )
+
+
+def reference_forward_node(id: Message) -> ForwardNode:
+    return ForwardNode(type='node', data=ReferenceForwardData(id=id))
 
 
 async def username(
