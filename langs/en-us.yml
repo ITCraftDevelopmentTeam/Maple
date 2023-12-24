@@ -1,0 +1,164 @@
+help:
+  "": |-
+    help —— Help
+    {{$
+      f"#help {command}: View help about {name}"
+      for command, name in {
+        "lang": "Language",
+        "hot": "Group Chat Hotness Ranking",
+        "cave": "Echo Cave",
+        "quick-math": "Quick Math",
+        "github": "GitHub Query"
+      }.items()
+    $}}
+  lang: |-
+    lang —— Language
+    #lang <language>: Set the language
+    #lang.list: List available languages
+    #lang.add: Contribute a language
+  hot: |-
+    hot —— Group Chat Hotness Ranking
+    #hot: Show group chat hotness ranking in the last ten minutes
+    #hot.hour: Show group chat hotness ranking in the last hour
+    #hot.day: Show today's group chat hotness ranking
+    #hot.total: Show total group chat hotness ranking
+    {{$
+      f"#help.{command}: Display {name} group chat hotness ranking"
+      for command, name in {
+        "": "Last Ten Minutes",
+        "hot": "Last Hour",
+        "cave": "Today",
+        "quick-math": "Total"
+      }.items()
+    $}}
+  cave: |-
+    cave —— Echo Cave
+    #cave [<branch>]: Read a random cave message
+    #cave.add <content>: Add a cave message
+    [Reply] #cave.add [<branch>]: Add the replied message to the cave
+    #cave.comment <cave id> <content>: Comment on a cave message
+    #cave.remove <cave id> [<comment id>]: Remove a cave message or comment
+    #cave.checkout <branch>: Switch to a branch
+  quick-math: |-
+    quick-math —— Quick Math
+    #quick-math: Enable quick math
+    #quick-math (on|off): [Enable|Disable] continuous quick math
+  github: |-
+    github —— GitHub Query
+    {{$
+      f"#github <{command}>: Query information about GitHub {name}"
+      for command, name in {
+        "repo": "Repository",
+        "issue": "Issue",
+        "pull": "Pull Request",
+        "commit": "Commit"
+      }.items()
+    $}}
+
+lang:
+  non-exist: "Language {{ lang }} does not exist..."
+  set: "Language successfully set to {{ lang }}"
+  list: |-
+    Available languages:
+    {{$
+      (">" if lang == __lang__ else "-") + f" {lang}"
+      for lang in langs
+    $}}
+  add: "If you're proficient with GitHub, contribute a language at ITCraftDevelopmentTeam/Maple by creating a pull request"
+
+hot:
+  none: "No group chat messages yet..."
+  rank: |-
+    {{$
+      (">" if group_id == event.group_id else "-") + f" {index + 1}. {group_name}: {count}"
+      for index, (group_id, group_name, count) in enumerate(ranks[:11])
+    $}}
+  10min: |-
+    Group chat hotness ranking in the last ten minutes:
+    {{% hot.rank %}}
+  hour: |-
+    Group chat hotness ranking in the last hour:
+    {{% hot.rank %}}
+  day: |-
+    Today's group chat hotness ranking:
+    {{% hot.rank %}}
+  total: |-
+    Total group chat hotness ranking:
+    {{% hot.rank %}}
+
+cave:
+  empty: "Echo Cave {{% cave.branch.desc %}} is empty. Contribute now!"
+  checkout: "Switched to branch #{{ branch }} successfully!"
+  branch:
+    desc: "§{{ branch }}"
+  cave:
+    desc: "{{% cave.branch.desc %}}#{{ cave_id }}"
+    text:
+      "": |-
+        {{% cave.cave.desc %}}:
+        {{ content }}
+        —— {{ sender }}
+      without-content: "{{% cave.cave.desc %}} —— {{ sender }}"
+    add: "{{% cave.cave.desc %}} added successfully!"
+    non-exist: "{{% cave.cave.desc %}} does not exist..."
+    remove:
+      "": "{{% cave.cave.desc %}} removed successfully!"
+      no-permission: "You don't have permission to remove {{% cave.cave.desc %}}..."
+  comment:
+    desc:
+      "": "{{% cave.cave.desc %}}'s {{% cave.comment.desc.pure %}}"
+      pure: "Comment #{{ comment_id }}"
+    text: "From {{ sender }}: {{% cave.comment.desc.pure %}}"
+    add: "{{% cave.comment.desc %}} added successfully!"
+    non-exist: "{{% cave.comment.desc %}} does not exist..."
+    remove:
+      "": "{{% cave.comment.desc %}} removed successfully!"
+      no-permission: "You don't have permission to remove {{% cave.comment.desc %}}..."
+
+quick-math:
+  question: "{{ a }} {{ op }} {{ b }} = ?"
+  correct: |-
+    Correct!
+    Congratulations, you've earned {{ got }} credit points!
+    You now have a total of {{ total }} credit points!
+  probably: 0.05
+  eggs:
+    0 / 0 = ?: "[nN]a[nN]|ZeroDivisionError"
+    creeper?: "[aA][wW]+.*?[mM][aA][N].*?"
+    undefined + undefined = ?: "[nN][aA][nN]|[uU][nN][dD][fF][iI][nN][eE][dD]"
+    114 + 514 = ?: "Hmm+Ahh+|114514|1919810"
+  auto:
+    "on": "Continuous quick math is now enabled"
+    "off": "Continuous quick math is now disabled"
+
+github:
+  non-exist: "GitHub/{{ path }} does not exist..."
+  nonsupport: "Currently not supported: {{ path }}"
+  repo: |-
+    Repository: {{ data["full_name"] }}
+    License: {{ (data["license"] or {"name": None})["name"] }}
+    Topics: {{ " ".join(data["topics"]) or None }}
+    Description: {{ data["description"] or None }}
+    Language: {{ data["language"] }} Stars: {{ data["stargazers_count"] }} Forks: {{ data["forks_count"] }} Issues: {{ data["open_issues_count"] }}
+  issue: |-
+    Issue: {{ data["title"] }}
+    Labels: {{ "".join(map(lambda x: f"【{x['name']}】", data["labels"])) or None }}
+    Assignees: {{ " ".join(map(lambda x: f"@{x['login']}", data["assignees"])) or None }}
+    {{ data["body"] }}
+  pull: |-
+    Pull Request: {{ data["title"] }}
+    Labels: {{ "".join(map(lambda x: f"【{x['name']}】", data["labels"])) or None }}
+    Assignees: {{ " ".join(lambda x: f"@{x['login']}", data["assignees"])) or None }}
+    {{ data["body"] }}
+  commit: |-
+    Commit: {{ data["commit"]["message"] }}
+    Total changes: {{ data["stats"]["total"] }} Additions: {{ data["stats"]["additions"] }} Deletions: {{ data["stats"]["deletions"] }}
+    {{$
+      {
+        "modified": f"Modified: {file['filename']} Additions: {file['additions']} Deletions: {file['deletions']}",
+        "added": f"Added: {file['filename']} Additions: {file['additions']}",
+        "removed": f"Removed: {file['filename']} Deletions: {file['deletions']}",
+        "renamed": f"Renamed: {file.get('previous_filename')} → {file['filename']}"
+      }[file["status"]]
+      for file in data["files"]
+    $}}
